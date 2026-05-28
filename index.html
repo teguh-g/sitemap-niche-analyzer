@@ -282,6 +282,12 @@ input,textarea,select{font-family:inherit;}
   body{height:-webkit-fill-available;}
 }
 
+
+.pdf-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:6px;}
+.pdf-opts label{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t);cursor:pointer;padding:8px 11px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--s2);transition:border .12s;}
+.pdf-opts label:hover{border-color:var(--accBd);}
+.pdf-opts input{width:auto;accent-color:var(--acc);-webkit-appearance:auto;appearance:auto;}
+
 </style>
 </head>
 <body>
@@ -357,10 +363,9 @@ input,textarea,select{font-family:inherit;}
         <button data-view="history">History</button>
       </div>
       <div class="tb-r">
-        <button class="btn btn-acc btn-sm" onclick="exportPDF('full')">PDF Lengkap</button>
-        <button class="btn btn-g btn-sm" onclick="exportPDF(curView)">PDF view</button>
-        <button class="btn btn-g btn-sm" onclick="exportXLSX()">XLSX</button>
-        <button class="btn btn-g btn-sm" onclick="exportCSV()">CSV</button>
+        <button class="btn btn-acc btn-sm" onclick="openExport('pdf')">PDF</button>
+        <button class="btn btn-g btn-sm" onclick="openExport('xlsx')">XLSX</button>
+        <button class="btn btn-g btn-sm" onclick="openExport('csv')">CSV</button>
       </div>
     </div>
     <div class="content" id="content"></div>
@@ -446,6 +451,20 @@ input,textarea,select{font-family:inherit;}
     <div style="flex:1"></div>
     <button class="btn btn-g btn-sm" onclick="closeSyncMo()">Batal</button>
     <button class="btn btn-p btn-sm" style="width:auto;padding:8px 20px;" onclick="syncSaveCfg()">Simpan Config</button>
+  </div>
+</div></div>
+
+<!-- EXPORT MODAL -->
+<div class="mo" id="exportMo"><div class="md">
+  <h3 id="exportTitle">Export</h3>
+  <div class="sub" id="exportSub">Pilih fitur yang ingin di-export.</div>
+  <div class="pdf-opts" id="exportOpts"></div>
+  <div class="btn-row">
+    <button class="btn btn-g btn-sm" onclick="exportToggleAll(true)">Centang semua</button>
+    <button class="btn btn-g btn-sm" onclick="exportToggleAll(false)">Kosongkan</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-g btn-sm" onclick="closeExport()">Batal</button>
+    <button class="btn btn-p btn-sm" style="width:auto;padding:8px 20px;" id="exportRun">Export</button>
   </div>
 </div></div>
 
@@ -1507,25 +1526,84 @@ async function syncPull(){
    ============================================================ */
 function safeName(s){return (s||'analisa').replace(/[^\w.-]+/g,'_').slice(0,50);}
 function dlBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-function exportXLSX(){
+// ============ UNIVERSAL EXPORT (PDF/XLSX/CSV with feature picker) ============
+const EXPORT_FEATURES=[
+  {id:'clusters',label:'Niche Clusters'},
+  {id:'matrix',label:'Cluster Matrix'},
+  {id:'gap',label:'Gap Analysis (per niche)'},
+  {id:'keywords',label:'Content Gap (keyword)'},
+  {id:'timeline',label:'Publishing'},
+  {id:'urls',label:'URL Explorer'},
+];
+let _exportKind='pdf';
+function openExport(kind){
   const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
-  if(typeof XLSX==='undefined'){toast('Library belum termuat','err');return;}
-  const {clusters,srcLabels,mineLabel}=aggregate(p);
-  const wb=XLSX.utils.book_new();
-  // sheet 1: clusters
-  const s1=[['Niche Cluster','Total URL',...srcLabels,'TOFU','MOFU','BOFU','Gap?']];
-  clusters.forEach(c=>s1.push([c.name,c.total,...srcLabels.map(s=>(c.bySrc[s]||[]).length),c.funnel.TOFU,c.funnel.MOFU,c.funnel.BOFU,c.isGap?'GAP':'']));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),'1. Clusters');
-  // sheet 2: all URLs
-  const s2=[['Source','IsMine','Cluster','Funnel','Slug','LastMod','URL']];
-  p.result.items.forEach(i=>s2.push([i.source,i.isMine,i.cluster,i.funnel,i.slug,i.lastmod,i.url]));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s2),'2. URLs');
-  // sheet 3: keywords
-  const s3=[['Cluster','Keyword','Funnel','Source']];
-  clusters.forEach(c=>{const seen=new Set();c.items.filter(i=>!i.isMine).forEach(it=>{const seg=it.slug.replace(/\/$/,'').split('/').filter(Boolean).pop()||it.slug;const kw=seg.replace(/\.(html|php)$/,'').replace(/[-_]+/g,' ').replace(/\b\d{4}\b/g,'').trim();if(!kw||seen.has(kw))return;seen.add(kw);s3.push([c.name,kw,it.funnel,it.source]);});});
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s3),'3. Keywords');
-  XLSX.writeFile(wb,safeName(p.name)+'.xlsx');toast('XLSX (3 sheet) diunduh!');
+  _exportKind=kind;
+  const titles={pdf:'Export PDF',xlsx:'Export Excel (XLSX)',csv:'Export CSV'};
+  const subs={pdf:'Tiap fitur jadi satu bagian laporan PDF.',xlsx:'Tiap fitur jadi satu sheet terpisah.',csv:'Semua fitur digabung jadi 1 file CSV (ada kolom penanda fitur).'};
+  $('exportTitle').textContent=titles[kind];
+  $('exportSub').textContent=subs[kind];
+  // default: current view checked + clusters; if full, all
+  $('exportOpts').innerHTML=EXPORT_FEATURES.map(f=>`<label><input type="checkbox" value="${f.id}" ${(f.id===curView||f.id==='clusters')?'checked':''}> ${esc(f.label)}</label>`).join('');
+  $('exportRun').onclick=runExport;
+  $('exportMo').classList.add('active');
 }
+function closeExport(){$('exportMo').classList.remove('active');}
+function exportToggleAll(v){$('exportOpts').querySelectorAll('input').forEach(c=>c.checked=v);}
+function runExport(){
+  const sel=[...$('exportOpts').querySelectorAll('input:checked')].map(c=>c.value);
+  if(!sel.length){toast('Pilih minimal 1 fitur','err');return;}
+  closeExport();
+  if(_exportKind==='pdf')exportPDFSections(sel);
+  else if(_exportKind==='xlsx')exportXLSX(sel);
+  else exportCSV(sel);
+}
+
+// shared data builders: each returns {head:[], rows:[[]]}
+function buildFeatureData(p,feat){
+  const agg=aggregate(p);const {clusters,srcLabels,mineLabel,clusterStatus}=agg;const items=p.result.items;
+  if(feat==='clusters'||feat==='matrix'){
+    const head=['Niche','Total',...srcLabels,'TOFU','MOFU','BOFU','Gap'];
+    const rows=clusters.map(c=>[c.name,c.total,...srcLabels.map(s=>(c.bySrc[s]||[]).length),c.funnel.TOFU,c.funnel.MOFU,c.funnel.BOFU,c.isGap?'GAP':'']);
+    return {head,rows};
+  }
+  if(feat==='gap'){
+    return {head:['Niche','Saya','Kompetitor','Status'],rows:clusters.map(c=>[c.name,c.mineCount,c.compCount,clusterStatus[c.name]||'-'])};
+  }
+  if(feat==='keywords'){
+    const myKw=new Set(),myUrls=[];
+    if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const t=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({slug:it.slug,tokens:t});});}
+    const rows=[];const seen=new Set();
+    clusters.forEach(c=>c.items.filter(i=>!i.isMine).forEach(it=>{const kw=kwClean(it.slug);if(!kw)return;const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);const toks=new Set(slugTokens(it.slug));let match='gap',pct=0,sim='';if(mineLabel){if(myKw.has(key))match='have';else{let bs=0,b=null;myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bs){bs=sc;b=mu;}});pct=Math.round(bs*100);if(bs>=0.5){match='similar';sim=b?b.slug:'';}}}rows.push([kw,c.name,it.funnel,match==='gap'?'GAP':match==='similar'?('MIRIP '+pct+'%'):'ADA',sim,it.source,it.url]);}));
+    return {head:['Keyword','Niche','Funnel','Status','MiripDgn','Sumber','URL'],rows};
+  }
+  if(feat==='timeline'){
+    const wd=items.filter(i=>i.lastmod&&/\d{4}-\d{2}/.test(i.lastmod));
+    const ms30=Date.now()-30*24*3600*1000;
+    return {head:['Sumber','Niche','Funnel','Slug','LastMod','Baru30hari'],rows:wd.map(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));const baru=(!isNaN(d)&&d.getTime()>=ms30)?'YA':'';return [i.source,i.cluster,i.funnel,i.slug,i.lastmod,baru];})};
+  }
+  // urls
+  return {head:['Source','Cluster','Funnel','Slug','LastMod','URL'],rows:items.map(i=>[i.source,i.cluster,i.funnel,i.slug,i.lastmod,i.url])};
+}
+const FEAT_LABEL={clusters:'Niche Clusters',matrix:'Cluster Matrix',gap:'Gap Analysis',keywords:'Content Gap',timeline:'Publishing',urls:'URL Explorer'};
+const FEAT_SHEET={clusters:'Clusters',matrix:'Matrix',gap:'Gap',keywords:'ContentGap',timeline:'Publishing',urls:'URLs'};
+
+function exportXLSX(sel){
+  const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
+  if(typeof XLSX==='undefined'){toast('Library XLSX belum termuat','err');return;}
+  sel=sel&&sel.length?sel:['clusters'];
+  // matrix duplicates clusters → skip if both selected
+  const feats=sel.filter((f,i)=>!(f==='matrix'&&sel.includes('clusters')));
+  const wb=XLSX.utils.book_new();let n=0;
+  feats.forEach(f=>{
+    const {head,rows}=buildFeatureData(p,f);
+    const aoa=[head,...rows];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),(++n)+'. '+(FEAT_SHEET[f]||f));
+  });
+  XLSX.writeFile(wb,safeName(p.name)+'.xlsx');
+  toast('XLSX ('+n+' sheet) diunduh!');
+}
+function exportPDFSections(sel){ exportPDF(sel); }
 function exportPDF(scope){
   const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
   const agg=aggregate(p);
@@ -1533,9 +1611,10 @@ function exportPDF(scope){
   const items=p.result.items;
   const date=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
   const esc2=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  // scope can be: 'full' | a single view id (string) | an array of feature ids
+  const selArr=Array.isArray(scope)?scope:null;
   const full=scope==='full';
-  // map view ids → section flags
-  const want=sec=>full||scope===sec;
+  const want=sec=>full||(selArr?selArr.includes(sec):scope===sec);
   let body='';
   body+=`<section class="cover"><div class="brand">SITEMAP NICHE GAP ANALYSIS</div><h1>${esc2(p.name)}</h1><div class="meta">${date} · ${items.length} URL · ${clusters.length} cluster · engine: ${p.result.engine||'rule'}</div><div class="by">Disusun oleh Teguh Gunawan, S.Li.</div></section>`;
 
@@ -1625,43 +1704,36 @@ function exportPDF(scope){
   body{height:-webkit-fill-available;}
 }
 
+
+.pdf-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:6px;}
+.pdf-opts label{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t);cursor:pointer;padding:8px 11px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--s2);transition:border .12s;}
+.pdf-opts label:hover{border-color:var(--accBd);}
+.pdf-opts input{width:auto;accent-color:var(--acc);-webkit-appearance:auto;appearance:auto;}
+
 </style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
   let w=null;
   try{w=window.open('','_blank');}catch(e){}
   if(w&&w.document){w.document.open();w.document.write(doc);w.document.close();toast('Report dibuka — pilih "Save as PDF" di dialog print');}
   else{const blob=new Blob([doc],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(p.name)+'-report.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast('Popup diblokir — file report.html diunduh. Buka lalu Ctrl/Cmd+P → Save as PDF','info');}
 }
-function exportCSV(){
+function exportCSV(sel){
   const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
-  const agg=aggregate(p);const {clusters,srcLabels,mineLabel,clusterStatus}=agg;const items=p.result.items;
-  let rows,suffix;
-  if(curView==='clusters'||curView==='matrix'){
-    rows=[['Niche','Total',...srcLabels,'TOFU','MOFU','BOFU','Gap']];
-    clusters.forEach(c=>rows.push([c.name,c.total,...srcLabels.map(s=>(c.bySrc[s]||[]).length),c.funnel.TOFU,c.funnel.MOFU,c.funnel.BOFU,c.isGap?'GAP':'']));
-    suffix='clusters';
-  }else if(curView==='gap'){
-    rows=[['Niche','Saya','Kompetitor','Status']];
-    clusters.forEach(c=>rows.push([c.name,c.mineCount,c.compCount,clusterStatus[c.name]||'-']));
-    suffix='gap';
-  }else if(curView==='keywords'){
-    const myKw=new Set(),myUrls=[];
-    if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const t=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({slug:it.slug,tokens:t});});}
-    rows=[['Keyword','Niche','Funnel','Status','MiripDgn','Sumber','URL']];const seen=new Set();
-    clusters.forEach(c=>c.items.filter(i=>!i.isMine).forEach(it=>{const kw=kwClean(it.slug);if(!kw)return;const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);const toks=new Set(slugTokens(it.slug));let match='gap',pct=0,sim='';if(mineLabel){if(myKw.has(key))match='have';else{let bs=0,b=null;myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bs){bs=sc;b=mu;}});pct=Math.round(bs*100);if(bs>=0.5){match='similar';sim=b?b.slug:'';}}}rows.push([kw,c.name,it.funnel,match==='gap'?'GAP':match==='similar'?('MIRIP '+pct+'%'):'ADA',sim,it.source,it.url]);}));
-    suffix='content-gap';
-  }else if(curView==='timeline'){
-    const wd=items.filter(i=>i.lastmod&&/\d{4}-\d{2}/.test(i.lastmod));
-    const nowTs=Date.now();const ms30=nowTs-30*24*3600*1000;
-    rows=[['Sumber','Niche','Funnel','Slug','LastMod','Baru30hari']];
-    wd.forEach(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));const baru=(!isNaN(d)&&d.getTime()>=ms30)?'YA':'';rows.push([i.source,i.cluster,i.funnel,i.slug,i.lastmod,baru]);});
-    suffix='publishing';
-  }else{ // urls / default
-    rows=[['Source','Cluster','Funnel','Slug','LastMod','URL']];
-    items.forEach(i=>rows.push([i.source,i.cluster,i.funnel,i.slug,i.lastmod,i.url]));
-    suffix='urls';
-  }
-  const csv=rows.map(r=>r.map(c=>{const s=String(c==null?'':c);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\n');
-  dlBlob(safeName(p.name)+'-'+suffix+'.csv',new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));toast('CSV ('+suffix+') diunduh!');
+  sel=sel&&sel.length?sel:['urls'];
+  const feats=sel.filter((f,i)=>!(f==='matrix'&&sel.includes('clusters')));
+  // combine all selected into ONE csv with a leading "Fitur" column.
+  // Different features have different columns → use a generic wide format: Fitur + Kolom1..N labeled per row block.
+  const blocks=[];
+  feats.forEach(f=>{
+    const {head,rows}=buildFeatureData(p,f);
+    // header row for this block (prefixed with feature)
+    blocks.push(['=== '+(FEAT_LABEL[f]||f)+' ===']);
+    blocks.push(['Fitur',...head]);
+    rows.forEach(r=>blocks.push([FEAT_LABEL[f]||f,...r]));
+    blocks.push([]); // spacer
+  });
+  const csv=blocks.map(r=>r.map(c=>{const s=String(c==null?'':c);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\n');
+  dlBlob(safeName(p.name)+'-export.csv',new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  toast('CSV ('+feats.length+' fitur) diunduh!');
 }
 
 /* ============================================================
