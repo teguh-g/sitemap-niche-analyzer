@@ -32,7 +32,7 @@
   --tofu:#1d4ed8;--mofu:#b45309;--bofu:#047857;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--t);font-family:var(--f);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:13px;}
+body{background:var(--bg);color:var(--t);font-family:var(--f);height:100vh;height:-webkit-fill-available;overflow:hidden;display:flex;flex-direction:column;font-size:13px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px;}::-webkit-scrollbar-thumb:hover{background:var(--bd2);}
 button{font-family:var(--f);}
 a{color:var(--acc);}
@@ -73,7 +73,7 @@ a{color:var(--acc);}
 .side-sec h3 svg{width:13px;height:13px;}
 .ig{margin-bottom:10px;}
 .ig label{display:block;font-size:10.5px;font-weight:600;color:var(--td);margin-bottom:4px;}
-.ig input,.ig select,.ig textarea{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--f);font-size:12px;padding:8px 10px;outline:none;transition:border .15s;}
+.ig input,.ig select,.ig textarea{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--f);font-size:12px;padding:8px 10px;outline:none;transition:border .15s;-webkit-appearance:none;appearance:none;}
 .ig textarea{font-family:var(--m);font-size:11px;resize:vertical;line-height:1.5;}
 .ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--acc);}
 .hint{font-size:9.5px;color:var(--tf);font-family:var(--m);margin-top:4px;line-height:1.5;}
@@ -111,7 +111,7 @@ a{color:var(--acc);}
 .sb .st span{color:var(--t);font-weight:700;font-family:var(--m);}
 .sb .credit{margin-left:auto;font-family:var(--m);font-size:9.5px;color:var(--tf);}
 
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
 .mo.active{display:flex;}
 .md{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);width:500px;max-width:96vw;max-height:90vh;overflow-y:auto;padding:20px;}
 .md h3{font-size:15px;margin-bottom:5px;display:flex;align-items:center;gap:9px;font-weight:700;}
@@ -207,7 +207,7 @@ a{color:var(--acc);}
 .tbl-wrap{overflow:auto;border:1px solid var(--bd);border-radius:var(--r);max-height:calc(100vh - 260px);}
 table.dt{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px;}
 table.dt th,table.dt td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--bd);}
-table.dt th{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--td);background:var(--s2);position:sticky;top:0;z-index:2;font-weight:700;cursor:pointer;user-select:none;white-space:nowrap;}
+table.dt th{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--td);background:var(--s2);position:-webkit-sticky;position:sticky;top:0;z-index:2;font-weight:700;cursor:pointer;user-select:none;white-space:nowrap;}
 table.dt th:hover{color:var(--acc);}
 table.dt td{vertical-align:top;}
 table.dt tr:hover td{background:var(--s2);}
@@ -219,7 +219,7 @@ table.dt td a{color:var(--acc);text-decoration:none;}table.dt td a:hover{text-de
 .copy-area{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--m);font-size:11px;padding:11px;outline:none;resize:vertical;line-height:1.6;}
 .copy-area:focus{border-color:var(--acc);}
 .filter-bar{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
-.filter-bar input,.filter-bar select{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--m);font-size:11px;padding:8px 10px;outline:none;}
+.filter-bar input,.filter-bar select{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--m);font-size:11px;padding:8px 10px;outline:none;-webkit-appearance:none;appearance:none;}
 .filter-bar input:focus,.filter-bar select:focus{border-color:var(--acc);}
 .filter-bar input{flex:1;max-width:300px;}
 
@@ -268,6 +268,13 @@ table.dt td a{color:var(--acc);text-decoration:none;}table.dt td a:hover{text-de
 .taxo-tips p{font-size:11.5px;color:var(--td);line-height:1.6;margin-bottom:9px;}
 .taxo-tips b{color:var(--t);}
 .prompt-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;font-family:var(--m);font-size:10.5px;line-height:1.6;color:var(--t);white-space:pre-wrap;max-height:160px;overflow-y:auto;}
+
+
+/* custom select caret (appearance:none removes native one) */
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238892a4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px !important;cursor:pointer;}
+/* Mac: 100vh robustness + momentum scroll */
+.content,.side,.tbl-wrap{-webkit-overflow-scrolling:touch;}
+input,textarea,select{font-family:inherit;}
 
 </style>
 </head>
@@ -1573,6 +1580,13 @@ function exportPDF(scope){
 .taxo-tips p{font-size:11.5px;color:var(--td);line-height:1.6;margin-bottom:9px;}
 .taxo-tips b{color:var(--t);}
 .prompt-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;font-family:var(--m);font-size:10.5px;line-height:1.6;color:var(--t);white-space:pre-wrap;max-height:160px;overflow-y:auto;}
+
+
+/* custom select caret (appearance:none removes native one) */
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238892a4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px !important;cursor:pointer;}
+/* Mac: 100vh robustness + momentum scroll */
+.content,.side,.tbl-wrap{-webkit-overflow-scrolling:touch;}
+input,textarea,select{font-family:inherit;}
 
 </style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
   // Try popup first; if blocked, fall back to downloading an .html the user can open & print
