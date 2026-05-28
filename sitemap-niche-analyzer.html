@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Sitemap Niche Gap Analyzer</title>
+<meta name="author" content="Teguh Gunawan, S.Li.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230b0e13'/><circle cx='10' cy='12' r='4' fill='%2334d399'/><circle cx='21' cy='10' r='3' fill='%234a90ff'/><circle cx='17' cy='21' r='4.5' fill='%23f59e0b'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#0a0d12;--s1:#141923;--s2:#1e2530;--s3:#2a3340;--bd:#36404f;--bd2:#4a5468;
+  --t:#f4f6fa;--td:#a4adbd;--tf:#717c90;
+  --acc:#5b9bff;--accBg:rgba(91,155,255,.14);--accBd:rgba(91,155,255,.4);
+  --warn:#fbb528;--warnBg:rgba(251,181,40,.14);--warnBd:rgba(251,181,40,.4);
+  --ok:#3ee0a4;--okBg:rgba(62,224,164,.14);--okBd:rgba(62,224,164,.4);
+  --danger:#ff5a5a;--purple:#a78bfa;--purpleBg:rgba(167,139,250,.14);
+  --tofu:#5b9bff;--mofu:#fbb528;--bofu:#3ee0a4;
+  --r:10px;--rs:6px;
+  --f:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --m:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
+}
+[data-theme="light"]{
+  --bg:#f7f8fa;--s1:#ffffff;--s2:#f1f3f7;--s3:#e4e8ee;--bd:#d2d8e0;--bd2:#a8b1bf;
+  --t:#0a0e14;--td:#4a5360;--tf:#7b8493;
+  --acc:#1d4ed8;--accBg:rgba(29,78,216,.10);--accBd:rgba(29,78,216,.35);
+  --warn:#b45309;--warnBg:rgba(180,83,9,.10);--warnBd:rgba(180,83,9,.35);
+  --ok:#047857;--okBg:rgba(4,120,87,.10);--okBd:rgba(4,120,87,.35);
+  --danger:#c41f1f;--purple:#7c3aed;--purpleBg:rgba(124,58,237,.10);
+  --tofu:#1d4ed8;--mofu:#b45309;--bofu:#047857;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--t);font-family:var(--f);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:13px;}
+::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px;}::-webkit-scrollbar-thumb:hover{background:var(--bd2);}
+button{font-family:var(--f);}
+a{color:var(--acc);}
+
+.hdr{padding:11px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--s1);flex-shrink:0;gap:10px;}
+.hdr h1{font-size:15px;font-weight:800;display:flex;align-items:center;gap:9px;letter-spacing:-.3px;}
+.hdr-dot{width:7px;height:7px;background:var(--ok);border-radius:50%;box-shadow:0 0 9px var(--ok);}
+.hdr-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.sep{width:1px;height:18px;background:var(--bd);margin:0 2px;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 13px;border:none;border-radius:var(--rs);font-size:11.5px;font-weight:600;cursor:pointer;transition:all .12s;}
+.btn .ic{width:13px;height:13px;flex-shrink:0;}
+.btn-sm{padding:6px 10px;font-size:10.5px;}
+.btn-p{background:var(--acc);color:#fff;width:100%;}.btn-p:hover{filter:brightness(1.08);}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.btn-g{background:var(--s2);color:var(--t);border:1px solid var(--bd2);font-weight:500;}
+.btn-g:hover{background:var(--s3);border-color:var(--acc);color:var(--acc);}
+.btn-d{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.25);}.btn-d:hover{background:rgba(239,68,68,.08);}
+.btn-acc{background:var(--accBg);border:1px solid var(--accBd);color:var(--acc);}.btn-acc:hover{filter:brightness(1.1);}
+.theme-tog{padding:6px 9px;background:transparent;border:1px solid var(--bd);color:var(--td);border-radius:var(--rs);cursor:pointer;display:flex;transition:all .12s;}
+.theme-tog:hover{border-color:var(--bd2);color:var(--t);}.theme-tog .ic{width:15px;height:15px;}
+
+.st-pill{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--td);font-family:var(--m);padding:5px 11px;border:1px solid var(--bd);border-radius:20px;cursor:pointer;transition:all .12s;}
+.st-pill:hover{border-color:var(--bd2);color:var(--t);}
+.st-pill .sd{width:6px;height:6px;border-radius:50%;}
+.st-pill.off .sd{background:var(--tf);}
+.st-pill.on .sd{background:var(--ok);box-shadow:0 0 6px var(--ok);}
+.st-pill.busy .sd{background:var(--warn);animation:pulse 1s infinite;}
+.st-pill.err .sd{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+.layout{display:grid;grid-template-columns:300px 1fr;flex:1;overflow:hidden;}
+.side{border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s1);overflow-y:auto;}
+.main{display:flex;flex-direction:column;overflow:hidden;}
+.side-sec{padding:15px 16px;border-bottom:1px solid var(--bd);}
+.side-sec h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--td);margin-bottom:11px;display:flex;align-items:center;gap:7px;justify-content:space-between;}
+.side-sec h3 .t{display:flex;align-items:center;gap:7px;}
+.side-sec h3 svg{width:13px;height:13px;}
+.ig{margin-bottom:10px;}
+.ig label{display:block;font-size:10.5px;font-weight:600;color:var(--td);margin-bottom:4px;}
+.ig input,.ig select,.ig textarea{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--f);font-size:12px;padding:8px 10px;outline:none;transition:border .15s;}
+.ig textarea{font-family:var(--m);font-size:11px;resize:vertical;line-height:1.5;}
+.ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--acc);}
+.hint{font-size:9.5px;color:var(--tf);font-family:var(--m);margin-top:4px;line-height:1.5;}
+
+/* competitor source rows */
+.src{border:1px solid var(--bd);border-radius:var(--rs);padding:10px;margin-bottom:9px;background:var(--s2);position:relative;}
+.src.mine{border-color:var(--okBd);background:var(--okBg);}
+.src-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.src-top input.lbl{flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:5px;color:var(--t);font-size:11px;font-weight:600;padding:5px 8px;outline:none;}
+.src-top input.lbl:focus{border-color:var(--acc);}
+.src-del{background:none;border:none;color:var(--danger);cursor:pointer;font-size:17px;line-height:1;padding:2px 5px;flex-shrink:0;}
+.src-tabs{display:flex;gap:0;margin-bottom:7px;border:1px solid var(--bd);border-radius:5px;overflow:hidden;}
+.src-tabs button{flex:1;background:var(--bg);border:none;color:var(--td);font-size:10px;font-weight:600;padding:5px;cursor:pointer;transition:.12s;}
+.src-tabs button.active{background:var(--acc);color:#fff;}
+.src-tabs button+button{border-left:1px solid var(--bd);}
+.src textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:5px;color:var(--t);font-family:var(--m);font-size:10.5px;padding:7px;outline:none;resize:vertical;min-height:54px;line-height:1.45;}
+.src input.url{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:5px;color:var(--t);font-family:var(--m);font-size:10.5px;padding:7px;outline:none;}
+.src textarea:focus,.src input.url:focus{border-color:var(--acc);}
+.src-meta{font-size:9px;color:var(--tf);font-family:var(--m);margin-top:5px;}
+
+.tb{padding:8px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--s1);flex-shrink:0;gap:10px;}
+.vt{display:flex;background:var(--s2);border-radius:var(--rs);overflow:hidden;border:1px solid var(--bd);flex-wrap:wrap;}
+.vt button{background:none;border:none;color:var(--td);font-size:11px;font-weight:600;padding:7px 13px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.vt button:hover{color:var(--t);}
+.vt button.active{background:var(--acc);color:#fff;}
+.tb-r{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+
+.content{flex:1;overflow:auto;padding:24px;}
+.es{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--td);text-align:center;padding:30px;gap:14px;}
+.es svg{opacity:.55;}
+.es h4{font-size:15px;color:var(--t);font-weight:700;}
+.es p{font-size:12.5px;max-width:400px;line-height:1.6;}
+
+.sb{padding:8px 16px;border-top:1px solid var(--bd);display:flex;gap:18px;font-size:10.5px;color:var(--td);background:var(--s1);flex-shrink:0;flex-wrap:wrap;align-items:center;}
+.sb .st span{color:var(--t);font-weight:700;font-family:var(--m);}
+.sb .credit{margin-left:auto;font-family:var(--m);font-size:9.5px;color:var(--tf);}
+
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.mo.active{display:flex;}
+.md{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);width:500px;max-width:96vw;max-height:90vh;overflow-y:auto;padding:20px;}
+.md h3{font-size:15px;margin-bottom:5px;display:flex;align-items:center;gap:9px;font-weight:700;}
+.md h3 svg{width:17px;height:17px;}
+.md .sub{font-size:11.5px;color:var(--td);margin-bottom:15px;line-height:1.55;}
+.md hr{border:none;border-top:1px solid var(--bd);margin:15px 0;}
+.md code{background:var(--s2);padding:1px 6px;border-radius:3px;font-family:var(--m);font-size:10.5px;color:var(--acc);}
+.btn-row{display:flex;gap:7px;margin-top:17px;align-items:center;}
+.field-lbl{font-size:10.5px;font-weight:700;color:var(--t);text-transform:uppercase;letter-spacing:.6px;margin:15px 0 8px;}
+.key-list{display:flex;flex-direction:column;gap:5px;margin-bottom:7px;}
+.key-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--s2);}
+.key-row.active{border-color:var(--acc);background:var(--accBg);}
+.key-row input[type=radio]{width:auto;cursor:pointer;accent-color:var(--acc);}
+.key-row .kn{flex:1;font-size:11.5px;color:var(--t);cursor:pointer;}
+.key-row .ku{font-family:var(--m);font-size:9px;color:var(--tf);}
+.key-row .kdel{background:none;border:none;color:var(--danger);font-size:16px;font-weight:bold;cursor:pointer;padding:0 4px;}
+.disc{background:var(--warnBg);border:1px solid var(--warnBd);border-radius:var(--rs);padding:10px 12px;font-size:10.5px;color:var(--warn);line-height:1.55;display:flex;gap:8px;}
+.disc svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;}
+.quota-row{display:flex;align-items:center;gap:9px;font-size:10.5px;margin-bottom:7px;font-family:var(--m);color:var(--td);}
+.quota-bar{flex:1;height:8px;background:var(--s2);border-radius:4px;overflow:hidden;}
+.quota-fill{height:100%;background:var(--acc);border-radius:4px;transition:width .3s;}
+.quota-fill.warn{background:var(--danger);}
+.quota-lbl{flex:0 0 95px;}.quota-val{flex:0 0 75px;text-align:right;color:var(--t);font-weight:700;}
+.step{margin-bottom:7px;padding-left:15px;position:relative;font-size:11px;color:var(--td);line-height:1.6;}
+.step::before{content:'';position:absolute;left:0;top:8px;width:5px;height:5px;background:var(--acc);border-radius:50%;}
+
+.toast{position:fixed;bottom:18px;right:18px;font-weight:600;font-size:11.5px;padding:10px 17px;border-radius:var(--rs);z-index:2000;transform:translateY(50px);opacity:0;transition:all .22s;max-width:440px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ===== results visual components ===== */
+.view-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
+.view-head h2{font-size:19px;font-weight:800;letter-spacing:-.4px;}
+.view-sub{font-size:11px;color:var(--td);font-family:var(--m);margin-top:4px;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px;margin-bottom:24px;}
+.stat{border:1px solid var(--bd);border-radius:var(--r);padding:16px 17px;background:var(--s1);position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;right:-12px;top:-12px;width:54px;height:54px;border-radius:50%;opacity:.1;background:var(--acc);}
+.stat .n{font-size:30px;font-weight:800;line-height:1;font-family:var(--m);}
+.stat .l{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--td);margin-top:7px;font-weight:600;}
+.stat.a .n{color:var(--acc);}.stat.a::after{background:var(--acc);}
+.stat.g .n{color:var(--ok);}.stat.g::after{background:var(--ok);}
+.stat.w .n{color:var(--warn);}.stat.w::after{background:var(--warn);}
+.stat.p .n{color:var(--purple);}.stat.p::after{background:var(--purple);}
+
+.insight{background:var(--s1);border:1px solid var(--bd);border-left:3px solid var(--acc);border-radius:var(--r);padding:18px 20px;margin-bottom:24px;}
+.insight h3{font-size:14px;font-weight:700;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.insight ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.insight li{font-size:12.5px;line-height:1.55;padding-left:18px;position:relative;color:var(--td);}
+.insight li b{color:var(--t);}
+.insight li::before{content:'';position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--acc);}
+
+.section-title{font-size:15px;font-weight:700;margin:26px 0 6px;display:flex;align-items:center;gap:8px;}
+.section-desc{font-size:11.5px;color:var(--td);margin-bottom:15px;line-height:1.5;max-width:760px;}
+
+/* cluster cards */
+.cl-grid{display:flex;flex-direction:column;gap:11px;}
+.cl-card{border:1px solid var(--bd);border-radius:var(--r);background:var(--s1);overflow:hidden;transition:border-color .15s;}
+.cl-card:hover{border-color:var(--bd2);}
+.cl-card.gap{border-left:3px solid var(--danger);}
+.cl-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;}
+.cl-head:hover{background:var(--s2);}
+.cl-caret{width:14px;height:14px;transition:transform .15s;flex-shrink:0;color:var(--td);}
+.cl-card.open .cl-caret{transform:rotate(90deg);}
+.cl-name{font-size:14px;font-weight:700;flex:1;}
+.cl-name .nd{font-size:10px;font-weight:500;color:var(--td);margin-left:7px;font-family:var(--m);}
+.cl-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.badge{font-size:9.5px;font-family:var(--m);font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.badge.cnt{background:var(--accBg);color:var(--acc);border:1px solid var(--accBd);}
+.badge.gap{background:rgba(255,90,90,.14);color:var(--danger);border:1px solid rgba(255,90,90,.3);}
+.badge.tofu{background:rgba(91,155,255,.14);color:var(--tofu);}
+.badge.mofu{background:rgba(251,181,40,.14);color:var(--mofu);}
+.badge.bofu{background:rgba(62,224,164,.14);color:var(--bofu);}
+/* stacked share bar per source */
+.cl-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--s2);margin:0 16px 12px;}
+.cl-bar span{height:100%;}
+.cl-body{border-top:1px solid var(--bd);padding:0;display:none;}
+.cl-card.open .cl-body{display:block;}
+.cl-funnel{display:flex;gap:0;height:26px;margin:12px 16px;border-radius:5px;overflow:hidden;border:1px solid var(--bd);}
+.cl-funnel span{display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;font-family:var(--m);color:#fff;min-width:0;overflow:hidden;white-space:nowrap;}
+.cl-funnel .f-tofu{background:var(--tofu);}.cl-funnel .f-mofu{background:var(--mofu);}.cl-funnel .f-bofu{background:var(--bofu);}
+.cl-urls{padding:4px 16px 14px;}
+.cl-src-group{margin-bottom:10px;}
+.cl-src-h{font-size:10.5px;font-weight:700;font-family:var(--m);color:var(--td);margin:8px 0 5px;display:flex;align-items:center;gap:6px;}
+.cl-src-h .dot{width:8px;height:8px;border-radius:50%;}
+.cl-url{font-size:10.5px;font-family:var(--m);padding:2px 0 2px 14px;color:var(--td);line-height:1.5;}
+.cl-url a{color:var(--acc);text-decoration:none;}.cl-url a:hover{text-decoration:underline;}
+.cl-url .fn{font-size:8.5px;padding:0 5px;border-radius:3px;margin-left:6px;}
+.cl-url .fn.tofu{background:rgba(91,155,255,.16);color:var(--tofu);}
+.cl-url .fn.mofu{background:rgba(251,181,40,.16);color:var(--mofu);}
+.cl-url .fn.bofu{background:rgba(62,224,164,.16);color:var(--bofu);}
+
+/* matrix table */
+.tbl-wrap{overflow:auto;border:1px solid var(--bd);border-radius:var(--r);max-height:calc(100vh - 260px);}
+table.dt{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px;}
+table.dt th,table.dt td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--bd);}
+table.dt th{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--td);background:var(--s2);position:sticky;top:0;z-index:2;font-weight:700;cursor:pointer;user-select:none;white-space:nowrap;}
+table.dt th:hover{color:var(--acc);}
+table.dt td{vertical-align:top;}
+table.dt tr:hover td{background:var(--s2);}
+table.dt td.num{text-align:right;font-family:var(--m);}
+table.dt th.num{text-align:right;}
+table.dt td.num,table.dt th.num{padding-right:14px;}
+table.dt td a{color:var(--acc);text-decoration:none;}table.dt td a:hover{text-decoration:underline;}
+.kw-pill{display:inline-block;font-size:10px;font-family:var(--m);background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:2px 8px;margin:2px;color:var(--t);}
+.copy-area{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--m);font-size:11px;padding:11px;outline:none;resize:vertical;line-height:1.6;}
+.copy-area:focus{border-color:var(--acc);}
+.filter-bar{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.filter-bar input,.filter-bar select{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t);font-family:var(--m);font-size:11px;padding:8px 10px;outline:none;}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--acc);}
+.filter-bar input{flex:1;max-width:300px;}
+
+.pill{font-size:10px;font-family:var(--m);padding:2px 8px;border-radius:4px;white-space:nowrap;}
+.pill.tofu{background:rgba(91,155,255,.14);color:var(--tofu);border:1px solid var(--accBd);}
+.pill.mofu{background:rgba(251,181,40,.14);color:var(--mofu);border:1px solid var(--warnBd);}
+.pill.bofu{background:rgba(62,224,164,.14);color:var(--bofu);border:1px solid var(--okBd);}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;font-family:var(--m);color:var(--td);margin-bottom:14px;align-items:center;}
+.legend span{display:flex;align-items:center;gap:6px;}
+.legend .sw{width:13px;height:13px;border-radius:3px;}
+
+.progress-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.pbar{width:300px;height:9px;background:var(--s2);border-radius:5px;overflow:hidden;}
+.pbar div{height:100%;background:var(--acc);transition:width .3s;}
+.spin{width:38px;height:38px;border:3px solid var(--s3);border-top-color:var(--acc);border-radius:50%;animation:sp 0.7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+.hist-card{border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;background:var(--s1);margin-bottom:11px;}
+.hist-card .hh{display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:8px;}
+.hist-card .ht{font-family:var(--m);font-size:9.5px;color:var(--tf);}
+.hist-chips{display:flex;flex-wrap:wrap;gap:5px;}
+
+/* ---- minimalist additions ---- */
+.note{display:flex;gap:9px;align-items:flex-start;background:var(--s1);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;margin-bottom:18px;font-size:11.5px;color:var(--td);line-height:1.55;}
+.note .ic{color:var(--acc);flex-shrink:0;margin-top:1px;}
+.note b{color:var(--t);font-weight:600;}
+.stat-grid.mini{grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.stat-grid.mini .stat{padding:13px 14px;box-shadow:none;}
+.stat-grid.mini .stat::after{display:none;}
+.stat-grid.mini .n{font-size:24px;}
+.stat-grid.mini .l{font-size:9.5px;margin-top:4px;}
+.tag{font-size:9.5px;font-family:var(--m);font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.tag.danger{background:rgba(255,90,90,.13);color:var(--danger);}
+.tag.warn{background:var(--warnBg);color:var(--warn);}
+.tag.ok{background:var(--okBg);color:var(--ok);}
+.colcopy{display:inline-flex;cursor:pointer;color:var(--tf);opacity:.55;transition:opacity .12s,color .12s;margin-left:3px;}
+.colcopy:hover{opacity:1;color:var(--acc);}
+.fcount{font-size:11px;color:var(--td);font-family:var(--m);align-self:center;}
+.stat{box-shadow:none;}
+.insight{box-shadow:none;}
+/* tone down heavy shadows for minimalist look */
+.cl-card,.hist-card{box-shadow:none;}
+
+
+.taxo-tips p{font-size:11.5px;color:var(--td);line-height:1.6;margin-bottom:9px;}
+.taxo-tips b{color:var(--t);}
+.prompt-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;font-family:var(--m);font-size:10.5px;line-height:1.6;color:var(--t);white-space:pre-wrap;max-height:160px;overflow-y:auto;}
+
+</style>
+</head>
+<body>
+<header class="hdr">
+  <h1><span class="hdr-dot"></span>Sitemap Niche Gap Analyzer</h1>
+  <div class="hdr-actions">
+    <div class="st-pill off" id="aiSt" onclick="openSettings()" title="Status Gemini"><span class="sd"></span><span id="aiLbl">AI: off</span></div>
+    <div class="st-pill off" id="syncSt" onclick="openSyncMo()" title="Status cloud sync"><span class="sd"></span><span id="syncLbl">Sync: off</span></div>
+    <span class="sep"></span>
+    <button class="btn btn-acc btn-sm" onclick="syncPull()" title="Load dari GitHub Gist"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Pull</span></button>
+    <button class="btn btn-acc btn-sm" onclick="syncPush()" title="Simpan ke GitHub Gist"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Push</span></button>
+    <span class="sep"></span>
+    <button class="btn btn-g btn-sm" onclick="openSettings()"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
+    <button class="theme-tog" onclick="toggleTheme()" id="btnTheme" title="Ganti tema"></button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-sec">
+      <h3><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Analisa</span>
+        <button class="btn btn-g btn-sm" style="padding:3px 9px;" onclick="newProject()">+ Baru</button>
+      </h3>
+      <div class="ig"><label>Nama analisa</label><input type="text" id="inName" placeholder="mis. Niche Furniture Bali" oninput="syncNameToProj()"></div>
+      <div id="projList" style="display:flex;flex-direction:column;gap:3px;"></div>
+    </div>
+
+    <div class="side-sec">
+      <h3><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Sitemap Saya <span style="font-weight:400;color:var(--tf);text-transform:none;letter-spacing:0;">(opsional)</span></span></h3>
+      <div id="mineSrc"></div>
+      <div class="hint">Kalau diisi → muncul kolom GAP (cluster yang kompetitor punya, kamu belum). Kosongkan kalau cuma mau intip kompetitor.</div>
+    </div>
+
+    <div class="side-sec">
+      <h3><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20v-1a5 5 0 0 1 9-3M22 20v-1a4 4 0 0 0-6-3.5"/></svg>Kompetitor</span>
+        <button class="btn btn-g btn-sm" style="padding:3px 9px;" onclick="addCompSrc()">+ Tambah</button>
+      </h3>
+      <div id="compSrcs"></div>
+    </div>
+
+    <div class="side-sec">
+      <div class="ig"><label>Engine clustering</label>
+        <select id="inEngine" onchange="onEngineChange()">
+          <option value="rule">Rule-otomatis (multi-kata, no setup)</option>
+          <option value="manual" selected>Manual taksonomi (kamu tentukan)</option>
+          <option value="gemini">Gemini AI (semantic, perlu key)</option>
+        </select>
+        <div class="hint" id="engineHint">Manual: kamu tentukan cluster + kata kuncinya di bawah. Paling terkontrol, tanpa AI.</div>
+      </div>
+      <div class="ig" id="taxoWrap">
+        <label>Taksonomi niche <span style="color:var(--tf);">(NamaCluster: kata1, kata2)</span></label>
+        <textarea id="inTaxo" style="min-height:120px;"></textarea>
+        <div class="hint">Format: <b>NamaCluster: kata1, kata2</b> (satu cluster per baris). URL masuk cluster yang kata kuncinya paling cocok; sisanya ke "Lainnya". <a href="#" onclick="showTaxoHelp();return false;" style="color:var(--acc);">Lihat tips bikin taksonomi</a></div>
+      </div>
+      <div class="ig"><label>Ignore pola URL <span style="color:var(--tf);">(non-konten)</span></label>
+        <input type="text" id="inIgnore" value="/tag/,/author/,/page/,/category/,?,.jpg,.png,.pdf,/wp-,/feed">
+      </div>
+      <div class="ig"><label>Max URL per sumber</label><input type="text" id="inMax" value="3000"></div>
+      <button class="btn btn-p" onclick="runAnalysis()" id="runBtn" style="margin-top:4px;">Analisa Cluster</button>
+      <button class="btn btn-g btn-sm" style="width:100%;margin-top:7px;" onclick="loadDemo()">Load contoh data</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="tb">
+      <div class="vt" id="viewTabs">
+        <button class="active" data-view="clusters">Niche Clusters</button>
+        <button data-view="matrix">Cluster Matrix</button>
+        <button data-view="gap">Gap Analysis</button>
+        <button data-view="keywords">Keyword Table</button>
+        <button data-view="timeline">Publishing</button>
+        <button data-view="urls">URL Explorer</button>
+        <button data-view="history">History</button>
+      </div>
+      <div class="tb-r">
+        <button class="btn btn-acc btn-sm" onclick="exportPDF('full')">PDF Lengkap</button>
+        <button class="btn btn-g btn-sm" onclick="exportPDF(curView)">PDF view</button>
+        <button class="btn btn-g btn-sm" onclick="exportXLSX()">XLSX</button>
+        <button class="btn btn-g btn-sm" onclick="exportCSV()">CSV</button>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+    <div class="sb">
+      <div class="st">Sumber: <span id="sbSrc">0</span></div>
+      <div class="st">Total URL: <span id="sbUrl">0</span></div>
+      <div class="st">Cluster: <span id="sbCl">0</span></div>
+      <div class="st">AI-tagged: <span id="sbAi">0</span></div>
+      <div class="credit">by Teguh Gunawan, S.Li.</div>
+    </div>
+  </main>
+</div>
+
+<!-- SETTINGS -->
+<div class="mo" id="settingsMo"><div class="md">
+  <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</h3>
+  <div class="sub">Semua key disimpan <b>lokal di browser ini</b> (localStorage). Tidak ada yang di-hardcode.</div>
+
+  <div class="field-lbl">Gemini API Keys (multi-key, gilir kuota)</div>
+  <div class="ig"><label>Model</label>
+    <select id="aiModel" onchange="renderQuota()">
+      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (termurah)</option>
+      <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (default, hemat & cukup untuk clustering)</option>
+      <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+      <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (workhorse hemat)</option>
+      <option value="gemini-3-flash">Gemini 3 Flash</option>
+      <option value="gemini-3.5-flash">Gemini 3.5 Flash (Flash tercerdas)</option>
+      <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (reasoning terbaik)</option>
+    </select>
+    <div class="hint">Default 2.5 Flash sudah cukup & murah untuk clustering. Model 3.x lebih pintar tapi cek ketersediaan/harga di akun AI Studio kamu — kalau model error, balik ke 2.5 Flash.</div>
+  </div>
+  <div class="key-list" id="aiKeyList"></div>
+  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:7px;">
+    <div class="ig" style="margin-bottom:0;"><label>Nama</label><input type="text" id="aiKeyName" placeholder="mis. Akun A"></div>
+    <div class="ig" style="margin-bottom:0;"><label>API Key</label><input type="password" id="aiKeyVal" placeholder="AIzaSy..."></div>
+  </div>
+  <button class="btn btn-g btn-sm" onclick="addAiKey()" style="width:100%;margin-top:7px;">+ Simpan Gemini key</button>
+  <div class="hint">Tambah beberapa key buat gilir kuota harian (RPD). Saat satu habis, otomatis pindah ke key berikutnya.</div>
+
+  <div class="field-lbl">Kuota hari ini (key + model aktif)</div>
+  <div class="quota-row"><span class="quota-lbl">Requests</span><div class="quota-bar"><div class="quota-fill" id="aiQuotaFill" style="width:0%"></div></div><span class="quota-val" id="aiQuotaVal">0 / 20</span></div>
+  <div class="quota-row"><span class="quota-lbl">Token in/out</span><span style="font-family:var(--m);color:var(--t);" id="aiTokVal">0 / 0</span></div>
+
+  <hr>
+  <div class="field-lbl">Fetch sitemap by URL (opsional)</div>
+  <div class="ig"><label>Metode fetch</label>
+    <select id="fetchMethod">
+      <option value="proxy">Proxy gratis (allorigins → corsproxy → codetabs)</option>
+      <option value="worker">Cloudflare Worker (paling stabil)</option>
+    </select>
+    <div class="hint">Paste XML/TSV langsung selalu paling reliable. Fetch by URL sering kena CORS.</div>
+  </div>
+  <div class="ig" id="workerWrap" style="display:none;"><label>Worker URL <span style="color:var(--tf);">(pakai ?fetch= param, seperti LP Analyzer)</span></label>
+    <input type="text" id="workerUrl" placeholder="https://xxx.workers.dev"><div class="hint">Boleh pakai Worker yang sama dari LP Competitor Analyzer.</div>
+  </div>
+
+  <hr>
+  <div class="field-lbl">Cara dapat key</div>
+  <div class="step">Gemini: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> → Create API Key</div>
+
+  <div class="btn-row">
+    <button class="btn btn-g btn-sm" onclick="testAi()" id="testAiBtn">Test Gemini</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-g btn-sm" onclick="closeSettings()">Tutup</button>
+    <button class="btn btn-p btn-sm" style="width:auto;padding:8px 20px;" onclick="saveSettings()">Simpan</button>
+  </div>
+</div></div>
+
+<!-- SYNC -->
+<div class="mo" id="syncMo"><div class="md">
+  <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>GitHub Gist Cloud Sync</h3>
+  <div class="sub">Sync semua analisa & history antar device via private Gist. Token disimpan lokal.</div>
+  <div class="ig"><label>GitHub Personal Access Token</label><input type="password" id="syncTok" placeholder="ghp_xxxx"></div>
+  <div class="ig"><label>Gist ID</label><input type="text" id="syncGid" placeholder="a1b2c3..."></div>
+  <label style="font-size:11px;color:var(--td);display:flex;align-items:center;gap:7px;cursor:pointer;margin-top:6px;"><input type="checkbox" id="syncAuto" style="width:auto;accent-color:var(--acc);"> Auto-push tiap selesai analisa</label>
+  <hr>
+  <div class="field-lbl">Setup pertama kali</div>
+  <div class="step">Buka <a href="https://github.com/settings/tokens/new?scopes=gist&description=Sitemap%20Niche%20Analyzer" target="_blank">GitHub Token Page</a> → scope <code>gist</code> → Generate → copy</div>
+  <div class="step">Buka <a href="https://gist.github.com/" target="_blank">gist.github.com</a> → secret gist, filename <code>sitemap-niche-analyzer.json</code>, isi <code>[]</code></div>
+  <div class="step">Copy Gist ID dari URL → paste → Simpan → Push</div>
+  <div class="btn-row">
+    <button class="btn btn-d btn-sm" onclick="syncDisconnect()">Disconnect</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-g btn-sm" onclick="closeSyncMo()">Batal</button>
+    <button class="btn btn-p btn-sm" style="width:auto;padding:8px 20px;" onclick="syncSaveCfg()">Simpan Config</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ============================================================
+   Sitemap Niche Gap Analyzer
+   - slug-only thematic clustering via Gemini (discovers niches)
+   - multi-key rotation + RPD tracking + history (localStorage)
+   - XML + TSV auto-parse, multi-competitor, optional own sitemap
+   ============================================================ */
+
+const LS_PROJ='snga-projects', LS_SET='snga-settings', LS_THEME='snga-theme', LS_SYNC='snga-sync';
+const RPD_LIMIT=20;
+const FUNNELS=['TOFU','MOFU','BOFU'];
+
+let projects=[], activeId=null, curView='clusters';
+let settings={ aiKeys:[], aiActive:'', aiModel:'gemini-2.5-flash', aiUsage:{}, fetchMethod:'proxy', workerUrl:'' };
+let syncCfg={ token:'', gistId:'', autoPush:false, lastSync:null };
+let syncBusy=false, analysisBusy=false;
+
+const $=id=>document.getElementById(id);
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+// ---------- inline SVG icons (no emoji) ----------
+const ICONS={
+  copy:'<path d="M9 9h10v10H9z"/><path d="M5 15V5h10"/>',
+  doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+  bolt:'<path d="M13 2 3 14h8l-1 8 10-12h-8z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  gap:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+  star:'<path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>'
+};
+function ic(name,size){const s=size||14;return `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">${ICONS[name]||''}</svg>`;}
+function keyId(k){let h=0;for(let i=0;i<k.length;i++)h=((h<<5)-h+k.charCodeAt(i))|0;return 'k'+Math.abs(h);}
+function toast(msg,type){const t=$('toast');t.textContent=msg;t.style.background=type==='err'?'var(--danger)':type==='info'?'var(--acc)':'var(--ok)';t.style.color='#fff';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2700);}
+
+/* ---------- funnel rules (for slug) ---------- */
+const FUNNEL_KW={
+  TOFU:['blog','what-is','what is','apa-itu','apa itu','guide','panduan','tutorial','cara','how-to','how to','glossary','glosarium','pengertian','definisi','arti','maksud','tips','trik','sejarah','manfaat','fungsi','kegunaan','jenis','macam','ragam','contoh','belajar','learn','pemula','dasar','adalah','mengenal','kenali','ide','inspirasi','listicle','perbedaan','beda','review','ulasan','news','berita','artikel','kenapa','mengapa','bagaimana','penyebab','gejala','ciri','tanda','sebab','akibat','dampak','pengaruh','penjelasan','memahami','pahami'],
+  MOFU:['comparison','perbandingan','bandingkan','alternative','alternatif','versus','vs','use-case','solusi','solution','checklist','template','tool','tools','calculator','kalkulator','case-study','studi-kasus','for-','untuk-','services','layanan','jasa','rekomendasi','terbaik','best','top','pilihan','wajib','panduan-memilih','cara-memilih','tips-memilih','vs-','dibanding'],
+  BOFU:['pricing','harga','price','biaya','tarif','paket','package','plan','demo','trial','buy','beli','order','pesan','checkout','signup','sign-up','daftar','register','contact','kontak','hubungi','quote','penawaran','product','produk','katalog','catalog','booking','reservasi','sewa','rental','kredit','cicilan','promo','diskon','jual','dijual','ready-stock','pre-order','spesifikasi','brosur','dealer','simulasi','konsultasi','garansi']
+};
+function funnelOf(slug){
+  const s=meaningfulSlug(slug).toLowerCase().replace(/[\/_-]+/g,' ');
+  let best='TOFU',bs=0;
+  for(const f of FUNNELS){let sc=0;for(const kw of FUNNEL_KW[f]){if(kw==='blog'||kw==='artikel'||kw==='news'||kw==='berita'||kw==='article')continue;const k=kw.replace(/[-_]/g,' ');if(s.includes(k))sc+=k.length;}
+    if(sc>bs){bs=sc;best=f;}
+  }
+  return bs===0?'TOFU':best;
+}
+
+/* ---------- sitemap parsers (validated) ---------- */
+function parseXmlSitemap(text){
+  const out=[];
+  const blocks=text.match(/<url\b[\s\S]*?<\/url>/gi)||[];
+  blocks.forEach(b=>{
+    const loc=(b.match(/<loc>\s*([\s\S]*?)\s*<\/loc>/i)||[])[1];
+    const lm=(b.match(/<lastmod>\s*([\s\S]*?)\s*<\/lastmod>/i)||[])[1]||'';
+    if(loc)out.push({url:loc.trim(),lastmod:lm.trim()});
+  });
+  if(out.length)return out;
+  (text.match(/<loc>\s*([\s\S]*?)\s*<\/loc>/gi)||[]).forEach(m=>{
+    const u=m.replace(/<\/?loc>/gi,'').trim();
+    if(u&&!/sitemap/i.test(u))out.push({url:u,lastmod:''});
+  });
+  return out;
+}
+function parseTabular(text){
+  const out=[];const lines=text.split(/\r?\n/);
+  const dateRe=/(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?(?:\s*[+\-]\d{2}:?\d{2}|Z)?)/;
+  let pending=null;
+  for(const raw of lines){
+    const line=raw.trim();if(!line)continue;
+    if(/^url\b/i.test(line)&&/last\s*mod/i.test(line))continue;
+    const cells=line.split(/\t|\s{2,}/).map(c=>c.trim()).filter(Boolean);
+    const url=cells.find(c=>/^https?:\/\//i.test(c))||(/^https?:\/\//i.test(line)?line.split(/\s/)[0]:null);
+    const date=(line.match(dateRe)||[])[1]||'';
+    if(url&&date){out.push({url,lastmod:date});pending=null;}
+    else if(url){if(pending)out.push({url:pending,lastmod:''});pending=url;}
+    else if(pending&&date){out.push({url:pending,lastmod:date});pending=null;}
+  }
+  if(pending)out.push({url:pending,lastmod:''});
+  return out;
+}
+function autoParse(text){
+  const t=(text||'').trim();if(!t)return{type:'empty',rows:[]};
+  if(/^<\?xml|<urlset|<sitemapindex|<loc>/i.test(t))return{type:'xml',rows:parseXmlSitemap(t)};
+  return{type:'tabular',rows:parseTabular(t)};
+}
+function slugOf(url){try{const p=new URL(url);return decodeURIComponent(p.pathname+p.search).toLowerCase();}catch(e){return (url||'').toLowerCase();}}
+function hostOf(url){try{return new URL(url).hostname.replace(/^www\./,'');}catch(e){return '';}}
+
+/* ---------- fetch by URL (proxy/worker) ---------- */
+const PROXIES=[u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy/?quest=${u}`];
+async function fetchSitemapUrl(url){
+  if(settings.fetchMethod==='worker'&&settings.workerUrl){
+    const wu=new URL(settings.workerUrl);wu.searchParams.set('fetch',url);
+    const r=await fetch(wu.toString());
+    if(r.ok){let d;try{d=await r.json();if(d.html)return d.html;}catch(e){return await r.text();}}
+  }
+  try{const r=await fetch(url,{mode:'cors'});if(r.ok){const t=await r.text();if(t.includes('<')||t.includes('http'))return t;}}catch(e){}
+  for(const p of PROXIES){try{const r=await fetch(p(url));if(r.ok){const t=await r.text();if(t.includes('<')||t.includes('http'))return t;}}catch(e){}}
+  throw new Error('Fetch gagal (CORS). Paste isi sitemap manual.');
+}
+
+/* ---------- AI usage ---------- */
+function aiU(){
+  const kid=settings.aiActive?keyId(settings.aiActive):'none';const m=settings.aiModel;
+  if(!settings.aiUsage[kid])settings.aiUsage[kid]={};
+  if(!settings.aiUsage[kid][m])settings.aiUsage[kid][m]={date:'',rpd:0,inTok:0,outTok:0};
+  const u=settings.aiUsage[kid][m];
+  const today=new Date(Date.now()-8*3600*1000).toISOString().split('T')[0];
+  if(u.date!==today){u.date=today;u.rpd=0;u.inTok=0;u.outTok=0;}
+  return u;
+}
+function aiRecord(i,o){const u=aiU();u.rpd++;u.inTok+=i||0;u.outTok+=o||0;persistSettings();updatePills();}
+// pick a key with quota left; rotate if active is exhausted
+function pickUsableKey(){
+  if(!settings.aiKeys.length)return null;
+  const cur=settings.aiActive;
+  const has=k=>{const kid=keyId(k);const m=settings.aiModel;const u=(settings.aiUsage[kid]&&settings.aiUsage[kid][m]);const today=new Date(Date.now()-8*3600*1000).toISOString().split('T')[0];const rpd=(u&&u.date===today)?u.rpd:0;return rpd<RPD_LIMIT;};
+  if(cur&&has(cur))return cur;
+  const next=settings.aiKeys.find(k=>has(k.key));
+  if(next){settings.aiActive=next.key;persistSettings();updatePills();toast('Pindah ke key: '+next.name,'info');return next.key;}
+  return null;
+}
+
+/* ---------- GEMINI: discover & assign niche clusters from slugs ---------- */
+async function geminiCluster(slugList){
+  const key=pickUsableKey();
+  if(!key)throw new Error('Semua Gemini key kehabisan kuota harian (RPD). Tambah key di Settings.');
+  const model=settings.aiModel;
+  const sample=slugList.map((s,i)=>`${i+1}. ${s}`).join('\n');
+  const prompt=`You are an SEO content strategist analyzing a website by its URL slugs. Do TWO things:
+
+TASK 1 — THEMATIC NICHE CLUSTERS. Group URLs by their actual SUBJECT/TOPIC (what the page is ABOUT), not by page type. Cluster names must be descriptive MULTI-WORD phrases naming the real subject, e.g. "uPVC Roofing", "Japanese Vocabulary", "Bali Villa Rentals", "Sourdough Baking Guides". NEVER use a single generic word like "Blog", "Atap", "Dengan", "Tips", or a stopword as a cluster name. Aim for 5-20 specific clusters depending on topical diversity.
+
+TASK 2 — FUNNEL STAGE per URL: TOFU (awareness/educational: what-is, guides, tips, definitions), MOFU (consideration: comparisons, alternatives, reviews, use-cases, vs), BOFU (decision: pricing, buy, demo, contact, product/service pages, booking).
+
+Return ONLY valid JSON (no markdown):
+{"assignments":[{"i":1,"cluster":"Cluster Name","funnel":"TOFU"}, ...]}
+Every index 1..${slugList.length} must appear exactly once.
+
+URL slugs:
+${sample}`;
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,responseMimeType:'application/json',maxOutputTokens:8192}})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));const msg=e.error?.message||('HTTP '+r.status);if(/quota|rate|429/i.test(msg)){const u=aiU();u.rpd=RPD_LIMIT;persistSettings();}throw new Error(msg);}
+  const data=await r.json();
+  const usage=data.usageMetadata||{};aiRecord(usage.promptTokenCount||0,usage.candidatesTokenCount||0);
+  let txt=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim().replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+  const s=txt.indexOf('{'),e=txt.lastIndexOf('}');if(s>=0&&e>s)txt=txt.slice(s,e+1);
+  const obj=JSON.parse(txt);
+  return obj.assignments||[];
+}
+
+/* ---------- rule-based fallback clustering (from slug tokens) ---------- */
+const STOP=new Set('the a an of to for in on is and or with at by dan atau yang untuk dari pada dengan ini itu nya kah lah pun para suatu sebuah adalah dapat bisa akan saat ketika agar supaya html php aspx htm www com co id memilih pilih milih dalam luar tahun bulan hari batu cara tips trik panduan how guide tutorial apa kenapa mengapa bagaimana kapan dimana siapa mana semua setiap setelah sebelum antara melalui tentang seputar mengenai harus wajib paling lebih sangat cukup juga saja hanya kah jadi menjadi membuat membeli memakai menggunakan terbaik bagus murah mahah baru lama bisa boleh perlu butuh ingin mau adalah ialah yaitu yakni serta beserta maupun bukan tidak belum sudah telah sedang masih akan tetap selalu sering kadang jarang banyak sedikit beberapa segala aneka berbagai macam jenis ragam'.split(/\s+/));
+// directory segments that carry no topical meaning — dropped before tokenizing/matching
+const GENERIC_SEG=new Set(['id','en','jp','cn','blog','blogs','artikel','article','articles','post','posts','news','berita','read','baca','story','stories','page','pages','kategori','category','categories','tag','tags','p','c','index','home','beranda','detail','view','content','contents']);
+// returns the meaningful part of a slug (drops language + generic dirs)
+function meaningfulSlug(slug){
+  const parts=decodeURIComponent(slug).replace(/\?.*$/,'').replace(/\.(html|php|aspx|htm)$/,'').split('/').filter(Boolean);
+  // drop language codes + generic directory segments (anywhere, not just first)
+  const LANG=new Set(['id','en','jp','cn','my','sg','us','uk','idn','eng']);
+  const kept=parts.filter(p=>{const lp=p.toLowerCase();return !GENERIC_SEG.has(lp)&&!LANG.has(lp);});
+  return (kept.length?kept:parts).join('/');
+}
+// generic words that must NEVER form a cluster name, wherever they appear in the slug
+const GENERIC_TOKEN=new Set('article articles artikel blog blogs post posts story stories news berita read baca page pages kategori category categories tag tags index home beranda detail view content contents info informasi update updates list listicle galeri gallery media press release siaran event events campaign campaigns editorial inspirasi inspiration journal jurnal magazine majalah newsletter promo promosi collection koleksi koleksinya catalog katalog all semua other others lain lainnya new newest latest terbaru terkini popular populer trending featured unggulan pilihan recommended rekomendasi the of and or for with why how what when where who which that this these those your you our about into more most very just only also then than from guide tips trik tip cara panduan tutorial ultimate complete lengkap honest review ulasan vs versus best top wajib harus paling lebih sangat cukup adalah merupakan yaitu yakni dengan untuk dari pada dalam serta atau dan ini itu yang sebuah suatu para semua mengenai seputar tentang hal cara langkah step steps things ways idea ideas overview intro introduction basics dasar pengertian penjelasan'.split(/\s+/));
+function slugTokens(slug){
+  return meaningfulSlug(slug).split(/[\/\-_]+/).map(t=>t.trim().toLowerCase())
+    .filter(t=>t.length>=3 && !STOP.has(t) && !GENERIC_TOKEN.has(t) && !/^\d+$/.test(t));
+}
+function normClusterName(n){
+  let s=(n||'').trim().replace(/\s+/g,' ');
+  if(!s)return 'Lainnya';
+  // title-case-ish, keep acronyms
+  return s.split(' ').map(w=>/^[A-Z0-9]{2,}$/.test(w)?w:(w.charAt(0).toUpperCase()+w.slice(1))).join(' ');
+}
+const DEFAULT_TAXO=`Perhiasan & Jewelry: perhiasan, jewelry, emas, berlian, cincin, kalung, gelang, anting, liontin, diamond, gold, platinum
+Wedding & Engagement: lamaran, tunangan, wedding, engagement, kawin, bridal, nikah, couple, mempelai, pernikahan
+Luxury & Fashion: luxury, mewah, premium, fashion, elegan, exclusive, branded, signature, style, koleksi
+Custom & Gift: custom, ukir, personalisasi, hadiah, gift, anniversary, valentine, souvenir, kado
+Edukasi Berlian & Emas: karat, kadar, sertifikat, clarity, color, cut, carat, asli, perawatan, tips, cara, panduan
+Promo & Harga: promo, diskon, sale, cashback, cicilan, harga, voucher, cicil
+Store & Lokasi: toko, store, outlet, lokasi, cabang, mall, showroom, butik
+Layanan & Service: cleaning, service, resize, repair, buyback, trade, warranty, garansi`;
+
+// manual taxonomy clustering: assign each item to best-matching cluster by keyword overlap
+function manualCluster(items, taxoText){
+  const taxo=(taxoText||'').split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
+    const i=line.indexOf(':');if(i<0)return null;
+    return {name:line.slice(0,i).trim(), kws:line.slice(i+1).split(',').map(k=>k.trim().toLowerCase()).filter(Boolean)};
+  }).filter(Boolean);
+  const clusters={};
+  items.forEach(it=>{
+    const slug=meaningfulSlug(it.slug).toLowerCase().replace(/[-_]/g,' ');
+    let best='Lainnya',bs=0;
+    taxo.forEach(t=>{let sc=0;t.kws.forEach(kw=>{const k=kw.replace(/[-_]/g,' ');if(slug.includes(k))sc+=k.length;});if(sc>bs){bs=sc;best=t.name;}});
+    (clusters[best]=clusters[best]||[]).push(it._idx);
+  });
+  return Object.entries(clusters).map(([name,indices])=>({name,indices}));
+}
+
+function ruleCluster(items){
+  // Build 2-3 token phrase frequencies. NO unigrams as cluster names.
+  const phraseFreq={};
+  const itemPhrases=items.map(it=>{
+    const toks=slugTokens(it.slug);
+    const phrases=new Set();
+    for(let n=2;n<=3;n++){for(let i=0;i+n<=toks.length;i++){phrases.add(toks.slice(i,i+n).join(' '));}}
+    phrases.forEach(p=>{phraseFreq[p]=(phraseFreq[p]||0)+1;});
+    return [...phrases];
+  });
+  const clusters={};
+  items.forEach((it,idx)=>{
+    const phrases=itemPhrases[idx];
+    let best=null,bestScore=0;
+    phrases.forEach(p=>{
+      const f=phraseFreq[p];
+      if(f<2)return; // must be shared by >=2 URLs
+      const wc=p.split(' ').length;
+      const score=f*(wc*wc); // prefer longer + more frequent phrases
+      if(score>bestScore){bestScore=score;best=p;}
+    });
+    const name=best?normClusterName(best):'Lainnya';
+    (clusters[name]=clusters[name]||[]).push(it._idx);
+  });
+  // merge clusters with <2 items into Lainnya, then cap to top 15 clusters
+  let out=[];const small=[];
+  Object.entries(clusters).forEach(([name,idxs])=>{if(name!=='Lainnya'&&idxs.length>=2)out.push({name,indices:idxs});else small.push(...idxs);});
+  // sort by size desc, keep top 15, merge the rest into Lainnya
+  out.sort((a,b)=>b.indices.length-a.indices.length);
+  const MAX_CLUSTERS=15;
+  if(out.length>MAX_CLUSTERS){
+    const overflow=out.slice(MAX_CLUSTERS);
+    out=out.slice(0,MAX_CLUSTERS);
+    overflow.forEach(c=>small.push(...c.indices));
+  }
+  if(small.length)out.push({name:'Lainnya',indices:small});
+  return out;
+}
+
+/* ---------- MAIN ANALYSIS ---------- */
+async function runAnalysis(){
+  if(analysisBusy)return;
+  let p=P();if(!p){newProject();p=P();}
+  collectInputsInto(p);
+  // gather sources
+  const sources=[];
+  if(p.mine && (p.mine.url||p.mine.paste)) sources.push({...p.mine,isMine:true,label:p.mine.label||'Saya'});
+  p.comps.forEach(c=>{if(c.url||c.paste)sources.push({...c,isMine:false});});
+  if(!sources.length){toast('Isi minimal 1 sitemap kompetitor (paste atau URL)','err');return;}
+
+  const ignore=$('inIgnore').value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const maxUrls=parseInt($('inMax').value)||3000;
+  const useAI=!!settings.aiActive;
+
+  analysisBusy=true;const btn=$('runBtn');btn.disabled=true;btn.textContent='Memproses…';
+  const setProg=(msg,pct)=>{$('content').innerHTML=`<div class="es"><div class="progress-wrap"><div class="spin"></div><h4>${esc(msg)}</h4><div class="pbar"><div style="width:${pct||0}%"></div></div></div></div>`;};
+
+  try{
+    // 1) ingest all sources
+    let allItems=[]; let srcMeta=[];
+    for(const src of sources){
+      setProg('Membaca sitemap: '+(src.label||'sumber'),10);
+      let text=src.paste||'';
+      if(!text&&src.url){try{text=await fetchSitemapUrl(src.url.trim());}catch(e){toast(src.label+': '+e.message,'err');}}
+      const parsed=autoParse(text);
+      let kept=0;
+      parsed.rows.slice(0,maxUrls).forEach(({url,lastmod})=>{
+        const slug=slugOf(url);
+        if(slug==='/'||slug==='')return;
+        if(ignore.some(ig=>url.toLowerCase().includes(ig)))return;
+        allItems.push({source:src.label,isMine:!!src.isMine,url,slug,lastmod,funnel:funnelOf(slug),cluster:null,aiTagged:false,_idx:allItems.length});
+        kept++;
+      });
+      srcMeta.push({label:src.label,isMine:!!src.isMine,host:hostOf((parsed.rows[0]||{}).url||src.url||''),count:kept,format:parsed.type});
+    }
+    if(!allItems.length){toast('Tidak ada URL konten setelah filter. Longgarkan ignore pattern.','err');analysisBusy=false;btn.disabled=false;btn.textContent='Analisa Cluster';return;}
+
+    // 2) cluster — engine: rule | manual | gemini
+    let aiCount=0;
+    const engine=p.engine||'rule';
+    if(engine==='gemini'&&settings.aiActive){
+      const BATCH=120;
+      const slugs=allItems.map(it=>it.slug);
+      for(let i=0;i<slugs.length;i+=BATCH){
+        setProg(`Gemini clustering ${i+1}–${Math.min(i+BATCH,slugs.length)} dari ${slugs.length}…`, Math.round(i/slugs.length*80)+15);
+        const chunk=slugs.slice(i,i+BATCH);
+        try{
+          const asg=await geminiCluster(chunk);
+          asg.forEach(a=>{const gi=i+((a.i||0)-1);if(allItems[gi]){allItems[gi].cluster=normClusterName(a.cluster);if(a.funnel&&FUNNELS.includes(a.funnel))allItems[gi].funnel=a.funnel;allItems[gi].aiTagged=true;aiCount++;}});
+        }catch(e){
+          toast('Gemini batch gagal: '+e.message+' — rule-based utk sisanya','err');
+          const sub=allItems.slice(i,i+BATCH).map((x,j)=>({...x,_idx:i+j}));
+          ruleCluster(sub).forEach(c=>c.indices.forEach(gi=>{if(allItems[gi]&&!allItems[gi].cluster)allItems[gi].cluster=c.name;}));
+        }
+      }
+      allItems.forEach(it=>{if(!it.cluster)it.cluster='Lainnya';});
+    }else if(engine==='manual'){
+      setProg('Clustering manual (taksonomi)…',50);
+      manualCluster(allItems, p.taxo||DEFAULT_TAXO).forEach(c=>c.indices.forEach(gi=>{allItems[gi].cluster=c.name;}));
+      allItems.forEach(it=>{if(!it.cluster)it.cluster='Lainnya';});
+    }else{
+      if(engine==='gemini'&&!settings.aiActive)toast('Engine Gemini dipilih tapi key belum aktif → pakai rule-otomatis','info');
+      setProg('Clustering rule-otomatis…',50);
+      ruleCluster(allItems).forEach(c=>c.indices.forEach(gi=>{allItems[gi].cluster=c.name;}));
+      allItems.forEach(it=>{if(!it.cluster)it.cluster='Lainnya';});
+    }
+
+    // 3) store result
+    p.result={ items:allItems, srcMeta, aiCount, usedAI:(p.engine==='gemini'&&aiCount>0), engine:(p.engine||'rule'), at:Date.now() };
+    p.analyzedAt=Date.now();
+    pushHistory(p);
+    persistProjects();renderProjects();
+    curView='clusters';renderView();updateSidebarStats();
+    toast(`Selesai! ${allItems.length} URL → ${new Set(allItems.map(i=>i.cluster)).size} cluster${useAI?` (${aiCount} via AI)`:''}.`);
+    if(syncCfg.autoPush&&syncCfg.token&&syncCfg.gistId)scheduleAutoPush();
+  }catch(e){
+    console.error(e);$('content').innerHTML=`<div class="es"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><h4>Analisa gagal</h4><p>${esc(e.message)}</p></div>`;
+    toast('Gagal: '+e.message,'err');
+  }finally{analysisBusy=false;btn.disabled=false;btn.textContent='Analisa Cluster';updatePills();}
+}
+
+/* ---------- cluster aggregation for rendering ---------- */
+function aggregate(p){
+  const items=p.result.items;
+  items.forEach(i=>{ i.cluster = normClusterName(i.cluster||'Lainnya'); });
+  // merge clusters that differ only by case/spacing → canonical display name = most frequent variant
+  const variants={}; // lowerkey -> {name->count}
+  items.forEach(i=>{const k=i.cluster.toLowerCase().replace(/\s+/g,' ').trim();(variants[k]=variants[k]||{})[i.cluster]=(variants[k][i.cluster]||0)+1;});
+  const canon={}; // lowerkey -> chosen display name
+  Object.entries(variants).forEach(([k,m])=>{canon[k]=Object.entries(m).sort((a,b)=>b[1]-a[1])[0][0];});
+  items.forEach(i=>{const k=i.cluster.toLowerCase().replace(/\s+/g,' ').trim();i.cluster=canon[k];});
+  const meta=p.result.srcMeta||[];
+  let srcLabels=meta.map(m=>m.label);
+  if(!srcLabels.length)srcLabels=[...new Set(items.map(i=>i.source))];
+  srcLabels=[...new Set(srcLabels)];
+  const mineLabel=(meta.find(s=>s.isMine)||{}).label||null;
+  const clusterNames=[...new Set(items.map(i=>i.cluster))];
+  const clusters=clusterNames.map(name=>{
+    const inCl=items.filter(i=>i.cluster===name);
+    const bySrc={};srcLabels.forEach(s=>bySrc[s]=inCl.filter(i=>i.source===s));
+    const mineCount=mineLabel?(bySrc[mineLabel]||[]).length:0;
+    const compCount=inCl.filter(i=>!i.isMine).length;
+    const funnel={TOFU:0,MOFU:0,BOFU:0};inCl.forEach(i=>funnel[i.funnel]=(funnel[i.funnel]||0)+1);
+    const isGap=mineLabel?(compCount>=2&&mineCount===0):false;
+    return {name,total:inCl.length,items:inCl,bySrc,mineCount,compCount,funnel,isGap};
+  }).sort((a,b)=>b.total-a.total);
+  const compLabels=srcLabels.filter(s=>s!==mineLabel);
+  // per-cluster gap status (only meaningful if mine exists)
+  const clusterStatus={};
+  clusters.forEach(c=>{
+    let st='AMAN';
+    if(mineLabel){
+      if(c.mineCount===0&&c.compCount>=2)st='GAP';
+      else if(c.mineCount===0&&c.compCount===1)st='PELUANG';
+      else if(c.mineCount<c.compCount)st='KURANG';
+      else if(c.mineCount>0&&c.compCount===0)st='UNIK';
+      else st='AMAN';
+    }else st='-';
+    clusterStatus[c.name]=st;
+  });
+  return {clusters,srcLabels,compLabels,mineLabel,clusterStatus};
+}
+// ---------- SVG donut chart ----------
+function donutSVG(data, opts){
+  opts=opts||{};const size=opts.size||190,stroke=opts.stroke||34,cx=size/2,cy=size/2,r=(size-stroke)/2;
+  const total=data.reduce((s,d)=>s+d.value,0)||1;
+  let off=0;const circ=2*Math.PI*r;
+  const segs=data.map((d,i)=>{const frac=d.value/total;const len=frac*circ;const pct=Math.round(frac*100);
+    const el=`<circle class="donut-seg" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="${stroke}" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})" data-label="${esc(d.label)}" data-val="${d.value}" data-pct="${pct}" style="cursor:pointer;transition:stroke-width .12s;" onmousemove="donutTip(event)" onmouseleave="donutTipHide()" onmouseenter="this.setAttribute('stroke-width','${stroke+5}')" onmouseout="this.setAttribute('stroke-width','${stroke}')"></circle>`;off+=len;return el;}).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex-shrink:0;">${segs}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="26" font-weight="800" fill="var(--t)" font-family="var(--m)">${total}</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="10" fill="var(--td)">${esc(opts.centerLabel||'total')}</text></svg>`;
+}
+function donutTip(e){
+  let tip=document.getElementById('donutTip');
+  if(!tip){tip=document.createElement('div');tip.id='donutTip';tip.style.cssText='position:fixed;z-index:5000;background:var(--ink,#10100e);color:#fff;padding:7px 11px;border-radius:6px;font-size:11.5px;font-family:var(--f);pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.35);max-width:240px;line-height:1.4;';document.body.appendChild(tip);}
+  const t=e.target;const label=t.getAttribute('data-label'),val=t.getAttribute('data-val'),pct=t.getAttribute('data-pct');
+  tip.innerHTML=`<b>${label}</b><br>${val} artikel · ${pct}%`;
+  tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px';
+}
+function donutTipHide(){const tip=document.getElementById('donutTip');if(tip)tip.style.display='none';}
+function donutBlock(title,data,opts){
+  const legend=data.map(d=>`<div style="display:flex;align-items:center;gap:7px;font-size:11.5px;margin-bottom:5px;"><span style="width:12px;height:12px;border-radius:3px;background:${d.color};flex-shrink:0;"></span><span style="flex:1;color:var(--td);">${esc(d.label)}</span><b style="font-family:var(--m);">${d.value}</b></div>`).join('');
+  return `<div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:18px 20px;">
+    ${donutSVG(data,opts)}<div style="flex:1;min-width:180px;">${title?`<div style="font-size:13px;font-weight:700;margin-bottom:10px;">${esc(title)}</div>`:''}${legend}</div></div>`;
+}
+const DONUT_COLORS=['#5b9bff','#fbb528','#3ee0a4','#a78bfa','#ff8fab','#4dd0e1','#ffab40','#9ccc65','#ef5a8c','#7c9cff','#26c6da','#d4a843'];
+
+// ---------- copy any text (with fallback for file://) ----------
+function copyText(txt,label){
+  if(!txt){toast('Kosong','err');return;}
+  const done=()=>toast((label||'Teks')+' tersalin!');
+  const fallback=()=>{
+    try{
+      const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.left='-9999px';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      const ok=document.execCommand('copy');document.body.removeChild(ta);
+      ok?done():toast('Browser blokir copy — pilih teks manual lalu Ctrl/Cmd+C','err');
+    }catch(e){toast('Gagal copy: '+e.message,'err');}
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(fallback);
+  }else fallback();
+}
+
+// ---------- universal PDF export (per-view or full) ----------
+function buildClusterText(p){
+  const {clusters,srcLabels,mineLabel}=aggregate(p);
+  let t='';
+  clusters.forEach(c=>{
+    t+=`\n## ${c.name} (${c.total} URL)\n`;
+    srcLabels.forEach(s=>{const arr=c.bySrc[s]||[];if(!arr.length)return;t+=`  [${s}]\n`;arr.forEach(it=>{t+=`   - ${it.slug} (${it.funnel})\n`;});});
+  });
+  return t.trim();
+}
+
+const SRC_COLORS=['#5b9bff','#fbb528','#3ee0a4','#a78bfa','#ff8fab','#4dd0e1','#ffab40','#9ccc65'];
+function srcColor(srcLabels,label){const i=srcLabels.indexOf(label);return SRC_COLORS[i%SRC_COLORS.length];}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+function renderView(){
+  $('viewTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.view===curView));
+  const p=P();
+  if(curView==='history')return renderHistory(p);
+  if(p&&p.result&&p.result._trimmed){
+    $('content').innerHTML=`<div class="es"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.3"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><path d="M21 3v6h-6"/></svg><h4>Detail analisa ini dipangkas</h4><p>Untuk menghemat penyimpanan, ${p.result._count||0} URL dari analisa non-aktif ini telah dihapus dari memori lokal (ringkasan & history tetap ada). Klik <b>Analisa Cluster</b> untuk memuat ulang dari sitemap.</p></div>`;
+    return;
+  }
+  if(!p||!p.result){
+    $('content').innerHTML=`<div class="es"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.3"><circle cx="9" cy="10" r="4"/><circle cx="18" cy="8" r="2.5"/><circle cx="15" cy="18" r="3.5"/><line x1="11.5" y1="12" x2="14" y2="16"/><line x1="12" y1="9" x2="16" y2="8.5"/></svg>
+      <h4>Belum ada hasil</h4><p>Paste sitemap kompetitor di panel kiri (XML atau format tabel), set Gemini key di Settings untuk clustering niche pintar, lalu klik <b>Analisa Cluster</b>. Coba <b>Load contoh data</b> dulu untuk lihat hasilnya.</p>
+      <button class="btn btn-acc btn-sm" onclick="loadDemo()">Load contoh data</button></div>`;
+    return;
+  }
+  if(curView==='clusters')return renderClusters(p);
+  if(curView==='matrix')return renderMatrix(p);
+  if(curView==='gap')return renderGap(p);
+  if(curView==='keywords')return renderKeywords(p);
+  if(curView==='timeline')return renderTimeline(p);
+  if(curView==='urls')return renderUrls(p);
+}
+
+function renderClusters(p){
+  const agg=aggregate(p);
+  const {clusters,srcLabels,mineLabel}=agg;
+  const items=p.result.items;
+  const compItems=items.filter(i=>!i.isMine);
+  // insights
+  const topNiche=clusters.filter(c=>c.compCount>0)[0];
+  const gaps=clusters.filter(c=>c.isGap);
+  const fAll={TOFU:0,MOFU:0,BOFU:0};compItems.forEach(i=>fAll[i.funnel]++);
+  const fTop=FUNNELS.sort((a,b)=>fAll[b]-fAll[a])[0];
+  const fMap={TOFU:'edukasi/awareness (main di traffic atas funnel)',MOFU:'pertimbangan (konten komparasi & solusi)',BOFU:'konversi (dorong pembelian/aksi)'};
+  const ins=[];
+  // per-competitor top niche (real names)
+  const compLabels=agg.compLabels;
+  compLabels.forEach(cl=>{
+    const clItems=compItems.filter(i=>i.source===cl);
+    if(!clItems.length)return;
+    const byCl={};clItems.forEach(i=>byCl[i.cluster]=(byCl[i.cluster]||0)+1);
+    const top=Object.entries(byCl).sort((a,b)=>b[1]-a[1])[0];
+    if(top)ins.push(`<b>${esc(cl)}</b> paling fokus di niche <b>${esc(top[0])}</b> (${top[1]} artikel).`);
+  });
+  // funnel skew
+  ins.push(`Distribusi funnel gabungan kompetitor condong ke <b>${fTop}</b> (${Math.round(fAll[fTop]/Math.max(compItems.length,1)*100)}%) — ${fMap[fTop]}.`);
+  // gaps with names
+  if(mineLabel){
+    if(gaps.length)ins.push(`<b>Saya</b> (${esc(mineLabel)}) punya <b>${gaps.length} niche gap</b> — cluster yang kompetitor garap tapi belum disentuh. Lihat tab Gap Analysis.`);
+    else ins.push(`<b>Saya</b> (${esc(mineLabel)}) sudah menyentuh semua niche yang digarap kompetitor.`);
+  }else{
+    ins.push(`Mode intip kompetitor (tanpa sitemap sendiri). Isi "Sitemap Saya" untuk melihat gap spesifik.`);
+  }
+  ins.push(`Total <b>${clusters.length} niche cluster</b> dari <b>${compItems.length}</b> URL kompetitor.`);
+
+  const stat=(n,l,c)=>`<div class="stat ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+  const eng=p.result.engine||'rule';
+  const modeBanner=eng==='gemini'&&p.result.aiCount>0
+    ? `<div style="background:var(--okBg);border:1px solid var(--okBd);border-radius:var(--rs);padding:10px 14px;margin-bottom:18px;font-size:11.5px;color:var(--ok);">${ic('check')} Engine: Gemini AI — ${p.result.aiCount} URL diklasifikasi semantik.</div>`
+    : eng==='manual'
+    ? `<div style="background:var(--accBg);border:1px solid var(--accBd);border-radius:var(--rs);padding:10px 14px;margin-bottom:18px;font-size:11.5px;color:var(--acc);">${ic('gear')} Engine: Manual taksonomi — cluster sesuai aturan kamu. Edit taksonomi di panel kiri kalau ada yang masuk "Lainnya".</div>`
+    : `<div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 14px;margin-bottom:18px;font-size:11.5px;color:var(--td);display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="flex:1;min-width:200px;">${ic('gear')} Engine: Rule-otomatis (multi-kata, tanpa AI). Untuk niche yang lebih akurat, coba <b>Manual taksonomi</b> atau <b>Gemini</b> di panel kiri.</span></div>`;
+  let html=`<div class="view-head"><div><h2>Niche Clusters</h2><div class="view-sub">${p.result.usedAI?`AI-discovered · ${p.result.aiCount} URL via Gemini`:'rule-based (tanpa AI)'} · ${new Date(p.result.at).toLocaleString('id-ID')}</div></div>
+    <div class="note">${ic('info')} <span>Pengelompokan URL kompetitor (dan kamu) berdasarkan tema/niche dari slug. Klik tiap cluster untuk lihat URL-nya. Donut = porsi tiap niche & funnel.</span></div></div>${modeBanner}
+    <div class="stat-grid">${stat(clusters.length,'Niche cluster','a')}${stat(compItems.length,'URL kompetitor','g')}${stat(srcLabels.filter(s=>s!==mineLabel).length,'Kompetitor','p')}${stat(gaps.length||'—','Niche gap','w')}</div>
+    <div class="insight"><h3>${ic('bolt')} Strategic Read</h3><ul>${ins.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+
+  // donut charts: cluster distribution + funnel
+  {
+    const top=clusters.filter(c=>c.compCount>0).slice(0,11).map((c,i)=>({label:c.name,value:c.compCount,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
+    const others=clusters.filter(c=>c.compCount>0).slice(11).reduce((s,c)=>s+c.compCount,0);
+    if(others)top.push({label:'Lainnya (cluster kecil)',value:others,color:'#6b7280'});
+    const fd=[{label:'TOFU',value:fAll.TOFU,color:'#5b9bff'},{label:'MOFU',value:fAll.MOFU,color:'#fbb528'},{label:'BOFU',value:fAll.BOFU,color:'#3ee0a4'}].filter(d=>d.value);
+    html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;" class="donut-row">${donutBlock('Distribusi Niche Cluster',top,{centerLabel:'artikel'})}${donutBlock('Distribusi Funnel',fd,{centerLabel:'artikel'})}</div>`;
+  }
+
+  // legend of sources
+  html+=`<div class="legend">${srcLabels.map(s=>`<span><span class="sw" style="background:${srcColor(srcLabels,s)}"></span>${esc(s)}${s===mineLabel?' (saya)':''}</span>`).join('')}</div>`;
+  html+=`<div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;"><button class="btn btn-g btn-sm" onclick="copyText(buildClusterText(P()),'Breakdown')">${ic('copy',13)} Copy breakdown</button><button class="btn btn-acc btn-sm" onclick="exportPDF('clusters')">${ic('doc',13)} PDF view</button></div>`;
+
+  html+=`<div class="cl-grid">`;
+  clusters.forEach((c,ci)=>{
+    const maxBar=Math.max(...clusters.map(x=>x.total),1);
+    const barSegs=srcLabels.map(s=>{const n=(c.bySrc[s]||[]).length;if(!n)return '';const w=n/c.total*100;return `<span style="width:${w}%;background:${srcColor(srcLabels,s)}" title="${esc(s)}: ${n}"></span>`;}).join('');
+    const ftot=c.total||1;
+    const fSeg=FUNNELS.map(f=>{const n=c.funnel[f];if(!n)return '';const w=n/ftot*100;return `<span class="f-${f.toLowerCase()}" style="width:${w}%" title="${f}: ${n}">${w>14?f:''}</span>`;}).join('');
+    // url groups by source
+    const urlGroups=srcLabels.map(s=>{const arr=c.bySrc[s]||[];if(!arr.length)return '';return `<div class="cl-src-group"><div class="cl-src-h"><span class="dot" style="background:${srcColor(srcLabels,s)}"></span>${esc(s)} (${arr.length})</div>${arr.slice(0,40).map(it=>`<div class="cl-url"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.slug)}</a><span class="fn ${it.funnel.toLowerCase()}">${it.funnel}</span></div>`).join('')}${arr.length>40?`<div class="cl-url" style="color:var(--tf)">+${arr.length-40} lagi…</div>`:''}</div>`;}).join('');
+    html+=`<div class="cl-card ${c.isGap?'gap':''}" id="cl-${ci}">
+      <div class="cl-head" onclick="document.getElementById('cl-${ci}').classList.toggle('open')">
+        <svg class="cl-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="cl-name">${esc(c.name)}<span class="nd">${c.total} URL</span></span>
+        <span class="cl-badges">
+          ${c.isGap?'<span class="badge gap">GAP</span>':''}
+          ${mineLabel?`<span class="badge cnt">saya ${c.mineCount} · kompetitor ${c.compCount}</span>`:`<span class="badge cnt">${c.total} artikel</span>`}
+        </span>
+      </div>
+      <div class="cl-bar">${barSegs}</div>
+      <div class="cl-body">
+        <div class="cl-funnel">${fSeg}</div>
+        <div class="cl-urls">${urlGroups}</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+
+function renderMatrix(p){
+  const {clusters,srcLabels,compLabels,mineLabel}=aggregate(p);
+  // columns: mine (if any) first, then each competitor separately (NOT merged)
+  const cols=(mineLabel?[mineLabel]:[]).concat(compLabels);
+  let html=`<div class="view-head"><div><h2>Cluster Matrix</h2><div class="view-sub">Baris = niche · kolom = ${mineLabel?'Saya + ':''}tiap kompetitor terpisah · angka = jumlah artikel · klik sel untuk lihat URL</div></div>
+    <div class="note">${ic('info')} <span>Jumlah artikel tiap niche (baris) per sumber (kolom). Klik angka untuk lihat daftar URL-nya. Berguna untuk lihat siapa kuat di niche apa.</span></div></div>`;
+  html+=`<div class="tbl-wrap"><table class="dt"><thead><tr><th>Niche Cluster</th>${cols.map(s=>`<th class="num">${esc(s)}${s===mineLabel?' · Saya':''}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody>`;
+  clusters.forEach((c,ci)=>{
+    html+=`<tr><td><b>${esc(c.name)}</b>${c.isGap?' <span class="badge gap">GAP</span>':''}</td>${cols.map(s=>{
+      const arr=c.bySrc[s]||[];const n=arr.length;
+      if(!n)return `<td class="num" style="color:var(--tf)">·</td>`;
+      return `<td class="num" style="cursor:pointer;color:var(--acc);font-weight:700;" onclick="showCellUrls('${esc(c.name).replace(/'/g,"")}','${esc(s).replace(/'/g,"")}')" title="klik lihat URL">${n}</td>`;
+    }).join('')}<td class="num"><b>${c.total}</b></td></tr>`;
+  });
+  // total row per column
+  html+=`<tr style="border-top:2px solid var(--bd2)"><td><b>TOTAL</b></td>${cols.map(s=>`<td class="num"><b>${p.result.items.filter(i=>i.source===s).length}</b></td>`).join('')}<td class="num"><b>${p.result.items.length}</b></td></tr>`;
+  html+=`</tbody></table></div>`;
+  html+=`<div id="cellUrls" style="margin-top:16px;"></div>`;
+  $('content').innerHTML=html;
+}
+function showCellUrls(clusterName,srcLabel){
+  const p=P();if(!p)return;
+  const arr=p.result.items.filter(i=>i.cluster===clusterName&&i.source===srcLabel);
+  const el=$('cellUrls');if(!el)return;
+  el.innerHTML=`<div class="cl-card open"><div class="cl-head" style="cursor:default"><span class="cl-name">${esc(srcLabel)} / ${esc(clusterName)}<span class="nd">${arr.length} URL</span></span></div>
+    <div class="cl-urls" style="padding:12px 16px;">${arr.map(it=>`<div class="cl-url"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.slug)}</a><span class="fn ${it.funnel.toLowerCase()}">${it.funnel}</span></div>`).join('')}</div></div>`;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderGap(p){
+  const {clusters,mineLabel}=aggregate(p);
+  if(!mineLabel){
+    $('content').innerHTML=`<div class="view-head"><div><h2>Gap Analysis</h2></div></div>
+    <div class="note">${ic('info')} <span>Ringkasan per-niche: cluster mana yang kompetitor punya tapi kamu lemah/kosong. Untuk daftar keyword spesifik yang belum kamu punya, buka tab <b>Content Gap</b>.</span></div><div class="es" style="height:auto;padding:50px;"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="9" cy="10" r="4"/><circle cx="17" cy="17" r="3"/></svg><h4>Belum ada sitemap kamu</h4><p>Gap analysis butuh "Sitemap Saya" diisi supaya bisa membandingkan niche yang kompetitor punya tapi kamu belum. Isi di panel kiri lalu analisa ulang.</p></div>`;
+    return;
+  }
+  // priority: gap (compCount desc) → under (mine < comp) → covered
+  const rows=clusters.map(c=>{
+    let prio,cls;
+    if(c.mineCount===0&&c.compCount>=2){prio='GAP';cls='p-crit';}
+    else if(c.mineCount===0&&c.compCount===1){prio='PELUANG';cls='p-high';}
+    else if(c.mineCount<c.compCount){prio='KURANG';cls='p-med';}
+    else if(c.mineCount>0&&c.compCount===0){prio='UNIK';cls='p-adv';}
+    else {prio='AMAN';cls='p-cov';}
+    return {...c,prio,cls};
+  }).sort((a,b)=>{const o={'GAP':0,'PELUANG':1,'KURANG':2,'UNIK':3,'AMAN':4};return (o[a.prio]-o[b.prio])||(b.compCount-a.compCount);});
+  let html=`<div class="view-head"><div><h2>Gap Analysis</h2><div class="view-sub">Niche kompetitor vs coverage kamu · diurut prioritas</div></div></div>
+    <div class="legend"><span><span class="tag danger">GAP</span> kompetitor punya (min. 2), kamu nol</span><span><span class="tag warn">PELUANG</span> 1 kompetitor punya</span><span><span class="tag" style="background:var(--accBg);color:var(--acc)">KURANG</span> kamu lebih sedikit</span><span><span class="tag" style="background:var(--purpleBg);color:var(--purple)">UNIK</span> cuma kamu</span><span><span class="tag ok">AMAN</span></span></div>
+    <div class="tbl-wrap"><table class="dt"><thead><tr><th>Niche Cluster</th><th class="num">Saya</th><th class="num">Kompetitor</th><th>Funnel dominan</th><th>Prioritas</th><th>Contoh URL kompetitor</th></tr></thead><tbody>`;
+  rows.forEach(c=>{
+    const fdom=FUNNELS.sort((a,b)=>c.funnel[b]-c.funnel[a])[0];
+    const sample=c.items.filter(i=>!i.isMine)[0];
+    html+=`<tr><td><b>${esc(c.name)}</b></td><td class="num">${c.mineCount}</td><td class="num">${c.compCount}</td><td><span class="pill ${fdom.toLowerCase()}">${fdom}</span></td><td>${c.prio}</td><td style="font-family:var(--m);font-size:10px;color:var(--td)">${sample?esc(sample.slug):'—'}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  $('content').innerHTML=html;
+}
+
+function kwClean(slug){
+  const STOP_KW=new Set('blog artikel article articles post page produk product index home beranda kategori category tag author daftar list halaman dan atau yang untuk dengan dari pada the a an of to for in on is id en detail view'.split(/\s+/));
+  const seg=meaningfulSlug(slug).split('/').filter(Boolean).pop()||'';
+  let kw=seg.replace(/[-_]+/g,' ').replace(/\b\d{4}\b/g,'').replace(/\b\d+\b/g,'').trim();
+  const words=kw.split(/\s+/).filter(Boolean).filter(w=>!STOP_KW.has(w));
+  kw=words.join(' ').trim();
+  if(words.length<2 && (words.length===0||words[0].length<5))return '';
+  if(kw.length<5)return '';
+  return kw;
+}
+// token-set similarity (Jaccard) between two slugs — for accurate "mirip dengan URL mana"
+function simScore(aTokens,bTokens){
+  if(!aTokens.size||!bTokens.size)return 0;
+  let inter=0;aTokens.forEach(t=>{if(bTokens.has(t))inter++;});
+  return inter/(aTokens.size+bTokens.size-inter); // Jaccard
+}
+function renderKeywords(p){
+  const agg=aggregate(p);
+  const {clusters,mineLabel,clusterStatus}=agg;
+  const items=p.result.items;
+  // my footprint: exact keyword set + per-URL token sets (for similarity)
+  const myKw=new Set();
+  const myUrls=[]; // {url,slug,kw,tokens}
+  if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const toks=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({url:it.url,slug:it.slug,kw:k,tokens:toks});});}
+
+  // per-URL rows from competitors
+  const rows=[];const seen=new Set();
+  clusters.forEach(c=>{
+    c.items.filter(i=>!i.isMine).forEach(it=>{
+      const kw=kwClean(it.slug);if(!kw)return;
+      const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);
+      const toks=new Set(slugTokens(it.slug));
+      let match='gap',simUrl=null,simPct=0;
+      if(mineLabel){
+        if(myKw.has(key)){match='have';}
+        else{
+          // find my most similar URL
+          let best=null,bestS=0;
+          myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bestS){bestS=sc;best=mu;}});
+          simPct=Math.round(bestS*100);
+          if(bestS>=0.5){match='similar';simUrl=best;}
+          else match='gap';
+        }
+      }
+      rows.push({kw,cluster:c.name,funnel:it.funnel,source:it.source,url:it.url,slug:it.slug,match,simUrl,simPct});
+    });
+  });
+
+  const nGap=rows.filter(r=>r.match==='gap').length;
+  const nSim=rows.filter(r=>r.match==='similar').length;
+  const nHave=rows.filter(r=>r.match==='have').length;
+
+  const fMatch=$('kwMatch')?$('kwMatch').value:(mineLabel?'gap':'all');
+  const fCluster=$('kwCluster')?$('kwCluster').value:'';
+  const fFunnel=$('kwFunnel')?$('kwFunnel').value:'';
+  const fText=$('kwSearch')?$('kwSearch').value.toLowerCase():'';
+  let view=rows.slice();
+  if(mineLabel&&fMatch!=='all')view=view.filter(r=>r.match===fMatch);
+  if(fCluster)view=view.filter(r=>r.cluster===fCluster);
+  if(fFunnel)view=view.filter(r=>r.funnel===fFunnel);
+  if(fText)view=view.filter(r=>r.kw.toLowerCase().includes(fText)||r.slug.includes(fText));
+  const clusterOpts=[...new Set(rows.map(r=>r.cluster))];
+
+  let html=`<div class="view-head"><div><h2>Content Gap</h2><div class="view-sub">${mineLabel?'Keyword kompetitor vs sitemap kamu — per URL':'Keyword kompetitor (isi Sitemap Saya untuk gap)'}</div></div></div>`;
+  html+=`<div class="note">${ic('info')} <span>Membandingkan tiap URL kompetitor dengan sitemap kamu. <b>Gap</b> = belum ada padanannya. <b>Mirip</b> = ada URL kamu yang menyerupai (lihat kolom "Mirip dengan"). <b>Sudah ada</b> = keyword-nya sama persis. Cocokkan via token slug (Jaccard).</span></div>`;
+
+  if(mineLabel){
+    html+=`<div class="stat-grid mini">
+      <div class="stat" style="border-left:2px solid var(--danger)"><div class="n" style="color:var(--danger)">${nGap}</div><div class="l">Gap (belum ada)</div></div>
+      <div class="stat" style="border-left:2px solid var(--warn)"><div class="n" style="color:var(--warn)">${nSim}</div><div class="l">Mirip</div></div>
+      <div class="stat" style="border-left:2px solid var(--ok)"><div class="n" style="color:var(--ok)">${nHave}</div><div class="l">Sudah ada</div></div>
+      <div class="stat"><div class="n">${rows.length}</div><div class="l">Total rival</div></div>
+    </div>`;
+  }
+  html+=`<div class="filter-bar">`;
+  if(mineLabel){html+=`<select id="kwMatch" onchange="renderView()">
+    <option value="gap" ${fMatch==='gap'?'selected':''}>Gap — belum ada</option>
+    <option value="similar" ${fMatch==='similar'?'selected':''}>Mirip</option>
+    <option value="have" ${fMatch==='have'?'selected':''}>Sudah ada</option>
+    <option value="all" ${fMatch==='all'?'selected':''}>Semua</option></select>`;}
+  html+=`<select id="kwCluster" onchange="renderView()"><option value="">Semua niche</option>${clusterOpts.map(c=>`<option ${fCluster===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <select id="kwFunnel" onchange="renderView()"><option value="">Semua funnel</option>${FUNNELS.map(f=>`<option ${fFunnel===f?'selected':''}>${f}</option>`).join('')}</select>
+    <input type="text" id="kwSearch" placeholder="cari…" value="${esc(fText)}" oninput="renderView()">
+    <span class="fcount">${view.length}</span></div>`;
+
+  // table — column headers have a small copy icon
+  const ch=(label,col)=>`<th>${esc(label)} <span class="colcopy" onclick="copyCol('${col}')" title="Copy kolom ${esc(label)}">${ic('copy',12)}</span></th>`;
+  const showSim=(!mineLabel)?false:(fMatch==='similar'||fMatch==='all');
+  html+=`<div class="tbl-wrap"><table class="dt"><thead><tr>${ch('Keyword','kw')}${ch('Niche','cluster')}<th>Funnel</th>${mineLabel?'<th>Status</th>':''}${showSim?'<th>Mirip dengan (URL kamu)</th>':''}<th class="num">Sumber</th>${ch('URL Kompetitor','url')}</tr></thead><tbody>`;
+  const mBadge=r=>r.match==='gap'?'<span class="tag danger">GAP</span>':r.match==='similar'?`<span class="tag warn">MIRIP ${r.simPct}%</span>`:r.match==='have'?'<span class="tag ok">ADA</span>':'';
+  view.forEach(r=>{
+    const simCell=showSim?`<td style="font-family:var(--m);font-size:10px;">${r.simUrl?`<a href="${esc(r.simUrl.url)}" target="_blank" rel="noopener" title="${r.simPct}% mirip">${esc(r.simUrl.slug)}</a>`:'<span style="color:var(--tf)">—</span>'}</td>`:'';
+    html+=`<tr><td><b>${esc(r.kw)}</b></td><td style="color:var(--td)">${esc(r.cluster)}</td><td><span class="pill ${r.funnel.toLowerCase()}">${r.funnel}</span></td>${mineLabel?`<td>${mBadge(r)}</td>`:''}${simCell}<td class="num" style="font-size:10px;color:var(--td)">${esc(r.source)}</td><td style="font-family:var(--m);font-size:10px;"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.slug)}</a></td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  $('content').innerHTML=html;
+  window._kwView=view;
+}
+function copyCol(which){
+  const v=window._kwView||[];if(!v.length){toast('Kosong','err');return;}
+  let txt,label;
+  if(which==='kw'){txt=v.map(r=>r.kw).join('\n');label='Keyword';}
+  else if(which==='url'){txt=v.map(r=>r.url).join('\n');label='URL';}
+  else if(which==='cluster'){txt=v.map(r=>r.cluster).join('\n');label='Niche';}
+  else{txt=v.map(r=>r.kw).join('\n');label='Keyword';}
+  copyText(txt,label);
+}
+function setKwTab(t){window._kwTab=t;renderView();}
+function copyKw(which){const t=which==='gap'?(window._kwGap||''):(window._kwAll||'');copyText(t,(which==='gap'?'Gap':'Semua')+' keyword');}
+function copyAllKeywords(){const t=window._kwCopyText||'';if(!t){toast('Tidak ada keyword','err');return;}navigator.clipboard.writeText(t).then(()=>toast('Keyword tersalin ke clipboard!')).catch(()=>{const a=$('kwCopyArea');if(a){a.select();document.execCommand('copy');toast('Tersalin!');}});}
+
+function renderTimeline(p){
+  const items=p.result.items;
+  const {clusters,mineLabel}=aggregate(p);
+  // build per-source monthly counts + conclusions
+  const bySrc={};
+  items.forEach(i=>{
+    if(!i.lastmod)return;const m=i.lastmod.match(/(\d{4})-(\d{2})/);if(!m)return;
+    const key=`${m[1]}-${m[2]}`;
+    (bySrc[i.source]=bySrc[i.source]||{})[key]=((bySrc[i.source]||{})[key]||0)+1;
+  });
+  const withDates=items.filter(i=>i.lastmod&&/\d{4}-\d{2}/.test(i.lastmod));
+  let html=`<div class="view-head"><div><h2>Publishing — Kesimpulan</h2><div class="view-sub">Analisis ritme & fokus publikasi dari tanggal lastmod</div></div>
+    <div class="note">${ic('info')} <span>Ritme & fokus publikasi dari tanggal lastmod. Termasuk daftar artikel yang diperbarui dalam 30 hari terakhir, dikelompokkan per niche.</span></div></div>`;
+  if(!withDates.length){
+    html+=`<div class="es" style="height:auto;padding:50px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h4>Tidak ada tanggal lastmod</h4><p>Sitemap yang kamu input tidak memuat tanggal modifikasi, jadi analisis publikasi tidak tersedia.</p></div>`;
+    $('content').innerHTML=html;return;
+  }
+  // conclusions per source
+  const now=new Date();const months3=new Date(now.getFullYear(),now.getMonth()-3,1);
+  const concl=[];
+  const srcLabels=[...new Set(withDates.map(i=>i.source))];
+  srcLabels.forEach(s=>{
+    const arr=withDates.filter(i=>i.source===s);
+    const dates=arr.map(i=>new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'))).filter(d=>!isNaN(d));
+    if(!dates.length)return;
+    dates.sort((a,b)=>a-b);
+    const newest=dates[dates.length-1],oldest=dates[0];
+    const recent=arr.filter(i=>{const d=new Date(i.lastmod.replace(' ','T'));return !isNaN(d)&&d>=months3;});
+    const recentPct=Math.round(recent.length/arr.length*100);
+    // dominant recent cluster
+    const recCl={};recent.forEach(i=>recCl[i.cluster]=(recCl[i.cluster]||0)+1);
+    const topRecent=Object.entries(recCl).sort((a,b)=>b[1]-a[1])[0];
+    const monthsSpan=Math.max(1,Math.round((newest-oldest)/(1000*60*60*24*30)));
+    const rate=(arr.length/monthsSpan).toFixed(1);
+    concl.push({s,total:arr.length,newest,oldest,recentPct,topRecent,rate,monthsSpan,isMine:s===mineLabel});
+  });
+  // overall most active
+  concl.sort((a,b)=>b.recentPct-a.recentPct);
+  const fmt=d=>d.toLocaleDateString('id-ID',{month:'short',year:'numeric'});
+  html+=`<div class="insight"><h3>${ic('calendar')} Ringkasan Publikasi</h3><ul>`;
+  if(concl[0])html+=`<li>Paling aktif belakangan: <b>${esc(concl[0].s)}</b> — ${concl[0].recentPct}% kontennya diperbarui dalam 3 bulan terakhir${concl[0].topRecent?`, fokus terbaru di niche <b>${esc(concl[0].topRecent[0])}</b>`:''}.</li>`;
+  const slow=concl[concl.length-1];if(slow&&concl.length>1)html+=`<li>Paling jarang update: <b>${esc(slow.s)}</b> — hanya ${slow.recentPct}% konten baru, kemungkinan sedang tidak agresif di konten.</li>`;
+  html+=`</ul></div>`;
+  // ===== 30-day recent articles, grouped by cluster =====
+  const nowTs=Date.now();const ms30=nowTs-30*24*3600*1000;
+  const recent=withDates.filter(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));return !isNaN(d)&&d.getTime()>=ms30;});
+  if(recent.length){
+    // group by cluster
+    const byCl={};recent.forEach(i=>(byCl[i.cluster]=byCl[i.cluster]||[]).push(i));
+    const sortedCl=Object.entries(byCl).sort((a,b)=>b[1].length-a[1].length);
+    html+=`<div class="section-title">${ic('calendar')} Artikel 30 hari terakhir <span style="font-weight:400;color:var(--td);font-size:11px;">(${recent.length} URL, dari tgl analisa) — dikelompokkan per niche</span></div>`;
+    html+=`<div style="display:flex;gap:7px;margin-bottom:12px;"><button class="btn btn-g btn-sm" onclick="copyRecent30()">${ic('copy',13)} Copy list</button></div>`;
+    html+=`<div class="cl-grid">`;
+    let copyTxt='';
+    sortedCl.forEach((entry,ci)=>{
+      const [cl,arr]=entry;
+      copyTxt+=`\n## ${cl} (${arr.length})\n`+arr.map(i=>`- ${i.url} [${i.source}] (${i.funnel})`).join('\n')+'\n';
+      const id='r30-'+ci;
+      const bySrc={};arr.forEach(i=>(bySrc[i.source]=bySrc[i.source]||[]).push(i));
+      html+=`<div class="cl-card open" id="${id}"><div class="cl-head" onclick="document.getElementById('${id}').classList.toggle('open')"><svg class="cl-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg><span class="cl-name">${esc(cl)}<span class="nd">${arr.length} artikel baru</span></span></div>
+        <div class="cl-body"><div class="cl-urls">${Object.entries(bySrc).map(([s,items])=>`<div class="cl-src-group"><div class="cl-src-h">${esc(s)} (${items.length})</div>${items.map(it=>`<div class="cl-url"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.slug)}</a><span class="fn ${it.funnel.toLowerCase()}">${it.funnel}</span> <span style="color:var(--tf);font-size:9px;">${esc((it.lastmod||'').slice(0,10))}</span></div>`).join('')}</div>`).join('')}</div></div></div>`;
+    });
+    html+=`</div>`;
+    window._recent30=copyTxt.trim();
+  }else{
+    html+=`<div class="section-title">${ic('calendar')} Artikel 30 hari terakhir</div><div style="color:var(--td);font-size:12px;margin-bottom:18px;">Tidak ada artikel yang diperbarui dalam 30 hari terakhir dari tanggal analisa.</div>`;
+  }
+
+  // per-source cards
+  html+=`<div class="section-title">Detail per sumber</div><div class="cl-grid">`;
+  concl.forEach(c=>{
+    html+=`<div class="cl-card"><div class="cl-head" style="cursor:default">
+      <span class="cl-name">${esc(c.s)}${c.isMine?' <span class="nd">(saya)</span>':''}</span>
+      <span class="cl-badges"><span class="badge cnt">${c.total} URL bertanggal</span><span class="badge ${c.recentPct>=40?'bofu':c.recentPct>=20?'mofu':'tofu'}">${c.recentPct}% baru (3 bln)</span></span>
+    </div><div style="padding:0 16px 14px;font-size:11.5px;color:var(--td);line-height:1.7;">
+      Rentang publikasi: <b style="color:var(--t)">${fmt(c.oldest)} – ${fmt(c.newest)}</b> (~${c.monthsSpan} bln) · rata-rata <b style="color:var(--t)">${c.rate} URL/bulan</b>.
+      ${c.topRecent?`<br>Niche yang paling sering diperbarui belakangan: <b style="color:var(--t)">${esc(c.topRecent[0])}</b> (${c.topRecent[1]} URL).`:''}
+    </div></div>`;
+  });
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+
+function renderUrls(p){
+  const items=p.result.items;
+  const f=$('urlFilter')?$('urlFilter').value.toLowerCase():'';
+  const fc=$('urlCluster')?$('urlCluster').value:'';
+  const fs=$('urlSource')?$('urlSource').value:'';
+  const clusters=[...new Set(items.map(i=>i.cluster))];
+  const sources=[...new Set(items.map(i=>i.source))];
+  let rows=items.filter(i=>(!f||i.url.toLowerCase().includes(f)||i.slug.includes(f))&&(!fc||i.cluster===fc)&&(!fs||i.source===fs));
+  let html=`<div class="view-head"><div><h2>URL Explorer</h2><div class="view-sub">${rows.length} dari ${items.length} URL</div></div>
+    <div class="note">${ic('info')} <span>Semua URL mentah dengan cluster & funnel-nya. Filter & cari di sini untuk verifikasi hasil clustering.</span></div></div>
+    <div class="filter-bar"><input type="text" id="urlFilter" placeholder="Filter URL/slug…" value="${esc(f)}" oninput="renderView()">
+    <select id="urlCluster" onchange="renderView()"><option value="">Semua cluster</option>${clusters.map(c=>`<option ${fc===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <select id="urlSource" onchange="renderView()"><option value="">Semua sumber</option>${sources.map(s=>`<option ${fs===s?'selected':''}>${esc(s)}</option>`).join('')}</select></div>
+    <div class="tbl-wrap"><table class="dt"><thead><tr><th>Sumber</th><th>Cluster</th><th>Funnel</th><th>Slug</th><th>Last Mod</th></tr></thead><tbody>`;
+  rows.slice(0,1500).forEach(i=>{
+    html+=`<tr><td style="font-size:10px;color:var(--td)">${esc(i.source)}</td><td>${esc(i.cluster)}</td><td><span class="pill ${i.funnel.toLowerCase()}">${i.funnel}</span></td><td><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.slug)}</a></td><td style="font-family:var(--m);font-size:10px;color:var(--td)">${esc((i.lastmod||'').slice(0,16)||'—')}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  $('content').innerHTML=html;
+  // re-focus filter
+  const fi=$('urlFilter');if(fi&&f){fi.focus();fi.setSelectionRange(fi.value.length,fi.value.length);}
+}
+
+function renderHistory(p){
+  const snaps=(p&&p.history)||[];
+  let html=`<div class="view-head"><div><h2>History</h2><div class="view-sub">Rekam jejak tiap analisa — lihat pergeseran niche kompetitor dari waktu ke waktu</div></div>
+    <div class="note">${ic('info')} <span>Snapshot tiap analisa. Bandingkan dari waktu ke waktu untuk lihat niche baru yang muncul atau hilang dari kompetitor.</span></div></div>`;
+  if(!snaps.length){html+=`<div class="es" style="height:auto;padding:50px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h4>Belum ada snapshot</h4><p>Tiap kali kamu klik Analisa, ringkasannya otomatis tersimpan di sini. Analisa beberapa kali (mis. tiap bulan) untuk melihat niche baru yang muncul.</p></div>`;$('content').innerHTML=html;return;}
+  const fmt=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  // diff newest vs prev
+  if(snaps.length>1){
+    const cur=snaps[0].clusters||{},prev=snaps[1].clusters||{};
+    const newNiche=Object.keys(cur).filter(n=>!(n in prev));
+    const goneNiche=Object.keys(prev).filter(n=>!(n in cur));
+    if(newNiche.length||goneNiche.length){
+      html+=`<div class="insight"><h3>${ic('search')} Perubahan vs snapshot sebelumnya</h3><ul>`;
+      if(newNiche.length)html+=`<li><b style="color:var(--ok)">Niche baru muncul:</b> ${newNiche.map(n=>esc(n)).join(', ')}</li>`;
+      if(goneNiche.length)html+=`<li><b style="color:var(--danger)">Niche hilang:</b> ${goneNiche.map(n=>esc(n)).join(', ')}</li>`;
+      html+=`</ul></div>`;
+    }
+  }
+  html+=`<div class="cl-grid">`;
+  snaps.forEach((s,i)=>{
+    const topCl=Object.entries(s.clusters||{}).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    html+=`<div class="hist-card"><div class="hh"><b>${i===0?'TERBARU':'#'+(snaps.length-i)}</b><span class="ht">${fmt(s.at)}</span>${i!==0?`<button class="btn btn-d btn-sm" style="margin-left:auto;padding:3px 8px;" onclick="delSnap(${i})">hapus</button>`:''}</div>
+      <div style="font-size:11px;color:var(--td);margin-bottom:8px;">${s.totalUrl} URL · ${s.clusterCount} cluster · ${s.gapCount} gap${s.usedAI?' · AI':''}</div>
+      <div class="hist-chips">${topCl.map(([n,c])=>`<span class="kw-pill">${esc(n)} <b>${c}</b></span>`).join('')}</div></div>`;
+  });
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+function copyRecent30(){copyText(window._recent30||'','List 30 hari');}
+function delSnap(i){const p=P();if(!p||!p.history)return;if(!confirm('Hapus snapshot ini?'))return;p.history.splice(i,1);persistProjects();renderView();toast('Snapshot dihapus');}
+
+function pushHistory(p){
+  if(!p.history)p.history=[];
+  const {clusters,mineLabel}=aggregate(p);
+  const clMap={};clusters.forEach(c=>clMap[c.name]=c.compCount||c.total);
+  p.history.unshift({at:Date.now(),totalUrl:p.result.items.length,clusterCount:clusters.length,gapCount:clusters.filter(c=>c.isGap).length,usedAI:p.result.usedAI,clusters:clMap});
+  if(p.history.length>30)p.history=p.history.slice(0,30);
+}
+
+/* ============================================================
+   PROJECTS / SIDEBAR
+   ============================================================ */
+function P(){return projects.find(p=>p.id===activeId);}
+function newProject(){
+  const p={id:uid(),name:$('inName').value.trim()||('Analisa '+(projects.length+1)),mine:{label:'Saya',mode:'paste',url:'',paste:''},comps:[{id:uid(),label:'Kompetitor 1',mode:'paste',url:'',paste:''}],engine:'manual',taxo:DEFAULT_TAXO,result:null,history:[],createdAt:Date.now()};
+  projects.unshift(p);activeId=p.id;persistProjects();renderProjects();loadProjInputs();renderView();
+}
+function selProject(id){activeId=id;loadProjInputs();renderProjects();renderView();updateSidebarStats();}
+function delProject(id,e){e.stopPropagation();if(!confirm('Hapus analisa ini?'))return;projects=projects.filter(p=>p.id!==id);if(activeId===id)activeId=projects[0]?.id||null;persistProjects();renderProjects();loadProjInputs();renderView();}
+function renderProjects(){
+  const el=$('projList');
+  if(!projects.length){el.innerHTML='<div class="hint">Belum ada analisa.</div>';return;}
+  el.innerHTML=projects.map(p=>`<div onclick="selProject('${p.id}')" style="display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:500;${p.id===activeId?'background:var(--s2);border-left:2px solid var(--acc);':''}">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--td)" stroke-width="2"><circle cx="9" cy="10" r="3"/><circle cx="16" cy="14" r="2.5"/></svg>
+    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.name)}</span>
+    <span style="font-family:var(--m);font-size:9px;color:var(--tf)">${p.result?p.result.items.length:0}</span>
+    <button onclick="delProject('${p.id}',event)" style="background:none;border:none;color:var(--td);cursor:pointer;padding:0 2px;" title="Hapus">×</button>
+  </div>`).join('');
+}
+function syncNameToProj(){const p=P();if(p){p.name=$('inName').value.trim()||p.name;renderProjects();}}
+
+// ---- source row UI ----
+function srcRowHtml(src,isMine){
+  const idAttr=isMine?'mine':src.id;
+  return `<div class="src ${isMine?'mine':''}" data-src="${idAttr}">
+    <div class="src-top">
+      <input class="lbl" value="${esc(src.label)}" placeholder="Label" onchange="updateSrc('${idAttr}','label',this.value)">
+      ${isMine?'':`<button class="src-del" onclick="delCompSrc('${src.id}')" title="Hapus">×</button>`}
+    </div>
+    <div class="src-tabs">
+      <button class="${src.mode!=='url'?'active':''}" onclick="updateSrc('${idAttr}','mode','paste');renderSrcUI()">Paste</button>
+      <button class="${src.mode==='url'?'active':''}" onclick="updateSrc('${idAttr}','mode','url');renderSrcUI()">URL</button>
+    </div>
+    ${src.mode==='url'
+      ? `<input class="url" value="${esc(src.url)}" placeholder="https://situs.com/sitemap.xml" onchange="updateSrc('${idAttr}','url',this.value)">`
+      : `<textarea placeholder="Paste isi sitemap (XML atau format tabel URL/Last Mod)…" onchange="updateSrc('${idAttr}','paste',this.value)">${esc(src.paste)}</textarea>`}
+    <div class="src-meta">${src.mode==='url'?'Fetch via '+(settings.fetchMethod==='worker'?'Worker':'proxy')+' (sering kena CORS)':'XML & tabel auto-detect'}</div>
+  </div>`;
+}
+function renderSrcUI(){
+  const p=P();if(!p)return;
+  $('mineSrc').innerHTML=srcRowHtml(p.mine,true);
+  $('compSrcs').innerHTML=p.comps.map(c=>srcRowHtml(c,false)).join('');
+}
+function updateSrc(id,field,val){
+  const p=P();if(!p)return;
+  if(id==='mine')p.mine[field]=val;
+  else{const c=p.comps.find(x=>x.id===id);if(c)c[field]=val;}
+  persistProjects();
+}
+function addCompSrc(){const p=P();if(!p){newProject();return;}p.comps.push({id:uid(),label:'Kompetitor '+(p.comps.length+1),mode:'paste',url:'',paste:''});persistProjects();renderSrcUI();}
+function delCompSrc(id){const p=P();if(!p)return;p.comps=p.comps.filter(c=>c.id!==id);if(!p.comps.length)p.comps.push({id:uid(),label:'Kompetitor 1',mode:'paste',url:'',paste:''});persistProjects();renderSrcUI();}
+function collectInputsInto(p){p.name=$('inName').value.trim()||p.name;p.engine=$('inEngine').value;p.taxo=$('inTaxo').value;}
+function loadProjInputs(){
+  const p=P();if(!p){$('inName').value='';$('mineSrc').innerHTML='';$('compSrcs').innerHTML='';return;}
+  $('inName').value=p.name||'';
+  if(!p.engine)p.engine='manual';
+  if(!p.taxo)p.taxo=DEFAULT_TAXO;
+  $('inEngine').value=p.engine;
+  $('inTaxo').value=p.taxo;
+  onEngineChange();
+  if(!p.mine)p.mine={label:'Saya',mode:'paste',url:'',paste:''};
+  if(!p.comps||!p.comps.length)p.comps=[{id:uid(),label:'Kompetitor 1',mode:'paste',url:'',paste:''}];
+  renderSrcUI();
+}
+function showTaxoHelp(){
+  const m=document.getElementById('taxoHelpMo');
+  if(m){m.classList.add('active');return;}
+  const div=document.createElement('div');div.className='mo active';div.id='taxoHelpMo';
+  div.innerHTML=`<div class="md"><h3>Tips menyusun Manual Taksonomi</h3>
+  <div class="sub">Taksonomi yang baik bikin clustering jauh lebih akurat daripada rule-otomatis. Berikut panduannya:</div>
+  <div class="taxo-tips">
+    <p><b>1. Mulai dari niche inti bisnis.</b> Pikirkan 6-12 tema besar yang jadi fokus konten industri kamu. Untuk jewelry misalnya: jenis produk (cincin, kalung), momen (wedding, anniversary), edukasi (berlian, emas), layanan (perawatan, custom).</p>
+    <p><b>2. Isi kata kunci sebanyak mungkin per cluster.</b> Sertakan sinonim, istilah Inggris & Indonesia, dan variasi: <code>cincin, ring, cincin-kawin, wedding-ring</code>. Makin lengkap, makin sedikit yang jatuh ke "Lainnya".</p>
+    <p><b>3. Pakai kata yang muncul di URL/slug</b>, bukan istilah marketing. Cek beberapa URL kompetitor dulu, lihat pola katanya, lalu masukkan.</p>
+    <p><b>4. Hindari kata generic</b> seperti <code>artikel, blog, tips, cara</code> sebagai kata kunci — itu muncul di hampir semua URL dan bikin cluster jadi kacau.</p>
+    <p><b>5. Urutkan dari spesifik ke umum.</b> Cluster yang lebih spesifik sebaiknya di atas; kalau ada URL cocok ke dua cluster, yang skornya tertinggi (kata kunci paling panjang & banyak) yang menang.</p>
+    <p><b>6. Iteratif.</b> Jalankan analisa, lihat isi "Lainnya" di tab Niche Clusters, ambil kata yang sering muncul di situ, lalu tambahkan ke taksonomi. Ulangi sampai "Lainnya" kecil.</p>
+  </div>
+  <div class="field-lbl">Template prompt (kalau mau dibantu AI menyusun)</div>
+  <div class="prompt-box" id="taxoPrompt">Saya seorang SEO strategist. Bantu saya membuat taksonomi niche untuk analisa kompetitor di industri [ISI INDUSTRI, mis. perhiasan/jewelry]. Format output: satu baris per cluster, "NamaCluster: kata1, kata2, kata3" — sertakan sinonim Indonesia & Inggris dan variasi yang biasa muncul di URL/slug artikel. Buat 8-12 cluster yang mencakup: jenis produk, momen/penggunaan, edukasi, layanan, dan promo. Hindari kata generic seperti artikel/blog/tips/cara. Berikut contoh URL kompetitor saya: [TEMPEL 10-20 URL].</div>
+  <div class="btn-row"><button class="btn btn-g btn-sm" onclick="copyText(document.getElementById('taxoPrompt').textContent,'Prompt')">${ic('copy',13)} Copy prompt</button><div style="flex:1"></div><button class="btn btn-p btn-sm" style="width:auto;padding:8px 18px;" onclick="document.getElementById('taxoHelpMo').classList.remove('active')">Tutup</button></div>
+  </div>`;
+  document.body.appendChild(div);
+  div.onclick=e=>{if(e.target===div)div.classList.remove('active');};
+}
+function onEngineChange(){
+  const eng=$('inEngine').value;
+  const hints={rule:'Rule-otomatis: kelompokkan dari frasa berulang di slug. Instan, tanpa AI.',manual:'Manual: kamu tentukan cluster + kata kuncinya di bawah. Paling terkontrol.',gemini:'Gemini: AI memahami makna slug & menamai niche sendiri. Perlu key di Settings.'};
+  $('engineHint').textContent=hints[eng]||'';
+  $('taxoWrap').style.display=eng==='manual'?'':'none';
+  const p=P();if(p){p.engine=eng;p.taxo=$('inTaxo').value;persistProjects();}
+}
+function updateSidebarStats(){
+  const p=P();
+  const r=p&&p.result;
+  $('sbSrc').textContent=r?r.srcMeta.length:0;
+  $('sbUrl').textContent=r?r.items.length:0;
+  $('sbCl').textContent=r?new Set(r.items.map(i=>i.cluster)).size:0;
+  $('sbAi').textContent=r?r.aiCount:0;
+}
+
+/* ============================================================
+   SETTINGS / KEYS
+   ============================================================ */
+function openSettings(){$('aiModel').value=settings.aiModel;$('fetchMethod').value=settings.fetchMethod;$('workerUrl').value=settings.workerUrl;$('workerWrap').style.display=settings.fetchMethod==='worker'?'':'none';renderAiKeys();renderQuota();$('settingsMo').classList.add('active');}
+function closeSettings(){$('settingsMo').classList.remove('active');}
+$('fetchMethod').addEventListener('change',e=>{$('workerWrap').style.display=e.target.value==='worker'?'':'none';});
+function saveSettings(){settings.aiModel=$('aiModel').value;settings.fetchMethod=$('fetchMethod').value;settings.workerUrl=$('workerUrl').value.trim();persistSettings();updatePills();renderSrcUI();closeSettings();toast('Settings tersimpan');}
+function renderAiKeys(){
+  const el=$('aiKeyList');
+  if(!settings.aiKeys.length){el.innerHTML='<div class="hint">Belum ada Gemini key.</div>';return;}
+  el.innerHTML=settings.aiKeys.map((k,i)=>{
+    const active=k.key===settings.aiActive;let used=0;try{const kid=keyId(k.key);used=(settings.aiUsage[kid]&&settings.aiUsage[kid][settings.aiModel])?settings.aiUsage[kid][settings.aiModel].rpd:0;}catch(e){}
+    return `<div class="key-row ${active?'active':''}"><input type="radio" name="aiPick" ${active?'checked':''} onchange="pickAi(${i})"><span class="kn" onclick="pickAi(${i})">${esc(k.name)} <span class="ku">${used}/${RPD_LIMIT}</span></span><button class="kdel" onclick="delAiKey(${i})">×</button></div>`;
+  }).join('');
+}
+function addAiKey(){const name=($('aiKeyName').value||'').trim()||('Key '+(settings.aiKeys.length+1));const key=($('aiKeyVal').value||'').trim();if(key.length<10){toast('Paste key valid','err');return;}if(settings.aiKeys.find(k=>k.key===key)){toast('Key sudah ada','err');return;}settings.aiKeys.push({name,key});settings.aiActive=key;$('aiKeyName').value='';$('aiKeyVal').value='';persistSettings();renderAiKeys();renderQuota();updatePills();toast('Key disimpan');}
+function pickAi(i){const k=settings.aiKeys[i];if(!k)return;settings.aiActive=k.key;persistSettings();renderAiKeys();renderQuota();updatePills();}
+function delAiKey(i){const k=settings.aiKeys[i];if(!k)return;if(!confirm('Hapus "'+k.name+'"?'))return;const wa=k.key===settings.aiActive;settings.aiKeys.splice(i,1);if(wa)settings.aiActive=settings.aiKeys[0]?.key||'';persistSettings();renderAiKeys();renderQuota();updatePills();}
+function renderQuota(){settings.aiModel=$('aiModel').value;const u=aiU();const pct=Math.min(100,u.rpd/RPD_LIMIT*100);const f=$('aiQuotaFill');if(f){f.style.width=pct+'%';f.classList.toggle('warn',u.rpd>=RPD_LIMIT);}const v=$('aiQuotaVal');if(v)v.textContent=`${u.rpd} / ${RPD_LIMIT}`;const tv=$('aiTokVal');if(tv)tv.textContent=`${u.inTok.toLocaleString()} / ${u.outTok.toLocaleString()}`;}
+async function testAi(){if(!settings.aiActive){toast('Simpan key dulu','err');return;}const m=$('aiModel').value;const b=$('testAiBtn');b.disabled=true;b.textContent='Testing…';try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${settings.aiActive}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Reply: OK'}]}]})});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||('HTTP '+r.status));}toast('Gemini OK! Model jalan.');}catch(e){toast('Gagal: '+e.message,'err');}finally{b.disabled=false;b.textContent='Test Gemini';}}
+
+/* ============================================================
+   THEME / PILLS / PERSIST
+   ============================================================ */
+const IC_MOON='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const IC_SUN='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+function loadTheme(){const t=localStorage.getItem(LS_THEME)||'dark';document.documentElement.setAttribute('data-theme',t);$('btnTheme').innerHTML=t==='dark'?IC_SUN:IC_MOON;}
+function toggleTheme(){const c=document.documentElement.getAttribute('data-theme')||'dark';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);$('btnTheme').innerHTML=n==='dark'?IC_SUN:IC_MOON;try{localStorage.setItem(LS_THEME,n);}catch(e){}}
+function updatePills(){
+  const ai=$('aiSt'),ail=$('aiLbl');
+  if(settings.aiActive){const u=aiU();ai.className='st-pill '+(u.rpd>=RPD_LIMIT?'err':'on');ail.textContent=`AI: ${u.rpd}/${RPD_LIMIT}`;}
+  else{ai.className='st-pill off';ail.textContent='AI: off';}
+  const sy=$('syncSt'),syl=$('syncLbl');
+  if(syncBusy){sy.className='st-pill busy';syl.textContent='Sync: …';}
+  else if(syncCfg.token&&syncCfg.gistId){sy.className='st-pill on';syl.textContent=syncCfg.lastSync?'Sync: '+timeAgo(syncCfg.lastSync):'Sync: ready';}
+  else{sy.className='st-pill off';syl.textContent='Sync: off';}
+}
+function timeAgo(t){let a=Math.floor((Date.now()-t)/1000);return a<60?'baru':a<3600?Math.floor(a/60)+'m':a<86400?Math.floor(a/3600)+'h':Math.floor(a/86400)+'d';}
+setInterval(updatePills,30000);
+function persistProjects(){
+  // estimate size; localStorage cap ~5MB. Degrade gracefully if too big.
+  function trySave(data){try{localStorage.setItem(LS_PROJ,JSON.stringify(data));return true;}catch(e){return false;}}
+  if(trySave(projects))return;
+  // 1) trim history on all projects to 5
+  let clone=projects.map(p=>({...p,history:(p.history||[]).slice(0,5)}));
+  if(trySave(clone)){projects.forEach((p,i)=>{p.history=clone[i].history;});toast('Storage hampir penuh — history lama dipangkas','info');return;}
+  // 2) drop heavy items[] from all but the active project, keep a lightweight summary
+  clone=projects.map(p=>{
+    if(p.id===activeId||!p.result)return {...p,history:(p.history||[]).slice(0,5)};
+    const r=p.result;
+    return {...p,history:(p.history||[]).slice(0,3),
+      result:{...r,items:[],_trimmed:true,_count:(r.items||[]).length}};
+  });
+  if(trySave(clone)){toast('Storage penuh — data URL analisa non-aktif dipangkas (ringkasan tetap ada). Export dulu kalau perlu detailnya.','err');return;}
+  // 3) last resort: keep only active project
+  const active=projects.find(p=>p.id===activeId);
+  if(active&&trySave([active])){toast('Storage penuh — hanya analisa aktif yang disimpan. Hapus/expor analisa lama.','err');return;}
+  toast('Storage penuh — gagal menyimpan. Export & hapus analisa lama.','err');
+}
+function persistSettings(){try{localStorage.setItem(LS_SET,JSON.stringify(settings));}catch(e){}}
+function loadAll(){
+  try{const p=localStorage.getItem(LS_PROJ);if(p){projects=JSON.parse(p);if(projects.length)activeId=projects[0].id;}}catch(e){}
+  try{const s=localStorage.getItem(LS_SET);if(s)settings={...settings,...JSON.parse(s)};}catch(e){}
+  try{const sy=localStorage.getItem(LS_SYNC);if(sy)syncCfg={...syncCfg,...JSON.parse(sy)};}catch(e){}
+}
+
+/* ============================================================
+   SYNC (GitHub Gist)
+   ============================================================ */
+function openSyncMo(){$('syncTok').value=syncCfg.token;$('syncGid').value=syncCfg.gistId;$('syncAuto').checked=!!syncCfg.autoPush;$('syncMo').classList.add('active');}
+function closeSyncMo(){$('syncMo').classList.remove('active');}
+function saveSync(){try{localStorage.setItem(LS_SYNC,JSON.stringify(syncCfg));}catch(e){}}
+function parseGistId(raw){let v=(raw||'').trim();const m=v.match(/gist\.github\.com\/(?:[^/]+\/)?([0-9a-f]+)/i);if(m)return m[1];return (v.split('/').filter(Boolean).pop()||v).replace(/[^0-9a-zA-Z]/g,'');}
+function syncSaveCfg(){syncCfg.token=$('syncTok').value.trim();syncCfg.gistId=parseGistId($('syncGid').value);$('syncGid').value=syncCfg.gistId;syncCfg.autoPush=$('syncAuto').checked;if(!syncCfg.token||!syncCfg.gistId){toast('Token & Gist ID wajib','err');return;}saveSync();updatePills();closeSyncMo();toast('Sync siap! Coba Push.');}
+function syncDisconnect(){if(!confirm('Disconnect sync?'))return;syncCfg={token:'',gistId:'',autoPush:false,lastSync:null};saveSync();updatePills();closeSyncMo();toast('Disconnected');}
+let autoPushTimer=null;function scheduleAutoPush(){clearTimeout(autoPushTimer);autoPushTimer=setTimeout(()=>syncPush(),3000);}
+async function syncPush(){
+  if(!syncCfg.token||!syncCfg.gistId){toast('Setup sync dulu','err');openSyncMo();return;}
+  if(syncBusy)return;syncBusy=true;updatePills();
+  try{
+    const r=await fetch('https://api.github.com/gists/'+syncCfg.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncCfg.token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({files:{'sitemap-niche-analyzer.json':{content:JSON.stringify(projects,null,1)}}})});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||('HTTP '+r.status));}
+    syncCfg.lastSync=Date.now();saveSync();toast('Pushed ke cloud!');
+  }catch(e){$('syncSt').className='st-pill err';toast('Push gagal: '+e.message,'err');}finally{syncBusy=false;updatePills();}
+}
+async function syncPull(){
+  if(!syncCfg.token||!syncCfg.gistId){toast('Setup sync dulu','err');openSyncMo();return;}
+  if(syncBusy)return;if(projects.length&&!confirm('Pull akan menimpa data lokal. Lanjut?'))return;syncBusy=true;updatePills();
+  try{
+    const r=await fetch('https://api.github.com/gists/'+syncCfg.gistId,{headers:{'Authorization':'token '+syncCfg.token,'Accept':'application/vnd.github+json'}});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||('HTTP '+r.status));}
+    const gist=await r.json();const file=gist.files['sitemap-niche-analyzer.json']||Object.values(gist.files)[0];if(!file)throw new Error('No data file');
+    let content=file.content;if(file.truncated&&file.raw_url)content=await(await fetch(file.raw_url)).text();
+    const data=JSON.parse(content||'[]');projects=Array.isArray(data)?data:[];activeId=projects[0]?.id||null;
+    persistProjects();syncCfg.lastSync=Date.now();saveSync();renderProjects();loadProjInputs();renderView();updateSidebarStats();
+    toast(`Pulled ${projects.length} analisa!`);
+  }catch(e){$('syncSt').className='st-pill err';toast('Pull gagal: '+e.message,'err');}finally{syncBusy=false;updatePills();}
+}
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+function safeName(s){return (s||'analisa').replace(/[^\w.-]+/g,'_').slice(0,50);}
+function dlBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function exportXLSX(){
+  const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
+  if(typeof XLSX==='undefined'){toast('Library belum termuat','err');return;}
+  const {clusters,srcLabels,mineLabel}=aggregate(p);
+  const wb=XLSX.utils.book_new();
+  // sheet 1: clusters
+  const s1=[['Niche Cluster','Total URL',...srcLabels,'TOFU','MOFU','BOFU','Gap?']];
+  clusters.forEach(c=>s1.push([c.name,c.total,...srcLabels.map(s=>(c.bySrc[s]||[]).length),c.funnel.TOFU,c.funnel.MOFU,c.funnel.BOFU,c.isGap?'GAP':'']));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),'1. Clusters');
+  // sheet 2: all URLs
+  const s2=[['Source','IsMine','Cluster','Funnel','Slug','LastMod','URL']];
+  p.result.items.forEach(i=>s2.push([i.source,i.isMine,i.cluster,i.funnel,i.slug,i.lastmod,i.url]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s2),'2. URLs');
+  // sheet 3: keywords
+  const s3=[['Cluster','Keyword','Funnel','Source']];
+  clusters.forEach(c=>{const seen=new Set();c.items.filter(i=>!i.isMine).forEach(it=>{const seg=it.slug.replace(/\/$/,'').split('/').filter(Boolean).pop()||it.slug;const kw=seg.replace(/\.(html|php)$/,'').replace(/[-_]+/g,' ').replace(/\b\d{4}\b/g,'').trim();if(!kw||seen.has(kw))return;seen.add(kw);s3.push([c.name,kw,it.funnel,it.source]);});});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s3),'3. Keywords');
+  XLSX.writeFile(wb,safeName(p.name)+'.xlsx');toast('XLSX (3 sheet) diunduh!');
+}
+function exportPDF(scope){
+  const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
+  const {clusters,srcLabels,compLabels,mineLabel}=aggregate(p);
+  const date=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  const esc2=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const full=scope==='full';
+  let body='';
+  // cover
+  body+=`<section class="cover"><div class="brand">SITEMAP NICHE GAP ANALYSIS</div><h1>${esc2(p.name)}</h1><div class="meta">${date} · ${p.result.items.length} URL · ${clusters.length} cluster · engine: ${p.result.engine||'rule'}</div><div class="by">Disusun oleh Teguh Gunawan, S.Li.</div></section>`;
+  // clusters section
+  if(full||scope==='clusters'){
+    body+=`<section><h2>Niche Clusters</h2><table><tr><th>Niche</th>${srcLabels.map(s=>`<th>${esc2(s)}${s===mineLabel?' (saya)':''}</th>`).join('')}<th>Total</th><th>TOFU</th><th>MOFU</th><th>BOFU</th></tr>`;
+    clusters.forEach(c=>{body+=`<tr><td><b>${esc2(c.name)}</b>${c.isGap?' [GAP]':''}</td>${srcLabels.map(s=>`<td>${(c.bySrc[s]||[]).length||''}</td>`).join('')}<td>${c.total}</td><td>${c.funnel.TOFU}</td><td>${c.funnel.MOFU}</td><td>${c.funnel.BOFU}</td></tr>`;});
+    body+=`</table></section>`;
+  }
+  // gap
+  if((full||scope==='gap')&&mineLabel){
+    body+=`<section><h2>Gap Analysis</h2><table><tr><th>Niche</th><th>Saya</th><th>Kompetitor</th><th>Status</th></tr>`;
+    clusters.forEach(c=>{let pr=c.mineCount===0&&c.compCount>=2?'GAP':c.mineCount===0&&c.compCount===1?'PELUANG':c.mineCount<c.compCount?'KURANG':c.mineCount>0&&c.compCount===0?'UNIK':'AMAN';body+=`<tr><td>${esc2(c.name)}</td><td>${c.mineCount}</td><td>${c.compCount}</td><td>${pr}</td></tr>`;});
+    body+=`</table></section>`;
+  }
+  // breakdown (full only)
+  if(full){
+    body+=`<section><h2>URL Breakdown per Cluster</h2>`;
+    clusters.forEach(c=>{body+=`<h3>${esc2(c.name)} (${c.total})</h3>`;srcLabels.forEach(s=>{const arr=c.bySrc[s]||[];if(!arr.length)return;body+=`<p><b>${esc2(s)}:</b></p><ul>`;arr.slice(0,60).forEach(it=>{body+=`<li>${esc2(it.slug)} <i>(${it.funnel})</i></li>`;});body+=`</ul>`;});});
+    body+=`</section>`;
+  }
+  const doc=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc2(p.name)} — Report</title><style>
+    *{margin:0;padding:0;box-sizing:border-box;}body{font-family:Inter,Segoe UI,sans-serif;color:#1a1a1a;font-size:11px;line-height:1.5;}
+    section{padding:22px 28px;page-break-inside:avoid;}.cover{height:90vh;display:flex;flex-direction:column;justify-content:center;border-left:6px solid #1d4ed8;page-break-after:always;}
+    .brand{font-size:11px;letter-spacing:3px;color:#1d4ed8;font-weight:700;margin-bottom:12px;}.cover h1{font-size:32px;margin-bottom:12px;}.meta{color:#555;font-size:12px;margin-bottom:4px;}.by{margin-top:auto;color:#888;}
+    h2{font-size:17px;color:#1d4ed8;margin-bottom:11px;padding-bottom:6px;border-bottom:2px solid #e5e8ed;}h3{font-size:13px;margin:12px 0 5px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:10px;}th,td{border:1px solid #ddd;padding:4px 7px;text-align:left;}th{background:#f1f3f7;font-weight:600;}
+    ul{margin:4px 0 8px 18px;}li{font-size:9.5px;margin-bottom:1px;}p{margin-bottom:4px;}
+    @media print{@page{margin:1cm;}}
+/* ---- minimalist additions ---- */
+.note{display:flex;gap:9px;align-items:flex-start;background:var(--s1);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;margin-bottom:18px;font-size:11.5px;color:var(--td);line-height:1.55;}
+.note .ic{color:var(--acc);flex-shrink:0;margin-top:1px;}
+.note b{color:var(--t);font-weight:600;}
+.stat-grid.mini{grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.stat-grid.mini .stat{padding:13px 14px;box-shadow:none;}
+.stat-grid.mini .stat::after{display:none;}
+.stat-grid.mini .n{font-size:24px;}
+.stat-grid.mini .l{font-size:9.5px;margin-top:4px;}
+.tag{font-size:9.5px;font-family:var(--m);font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.tag.danger{background:rgba(255,90,90,.13);color:var(--danger);}
+.tag.warn{background:var(--warnBg);color:var(--warn);}
+.tag.ok{background:var(--okBg);color:var(--ok);}
+.colcopy{display:inline-flex;cursor:pointer;color:var(--tf);opacity:.55;transition:opacity .12s,color .12s;margin-left:3px;}
+.colcopy:hover{opacity:1;color:var(--acc);}
+.fcount{font-size:11px;color:var(--td);font-family:var(--m);align-self:center;}
+.stat{box-shadow:none;}
+.insight{box-shadow:none;}
+/* tone down heavy shadows for minimalist look */
+.cl-card,.hist-card{box-shadow:none;}
+
+
+.taxo-tips p{font-size:11.5px;color:var(--td);line-height:1.6;margin-bottom:9px;}
+.taxo-tips b{color:var(--t);}
+.prompt-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;font-family:var(--m);font-size:10.5px;line-height:1.6;color:var(--t);white-space:pre-wrap;max-height:160px;overflow-y:auto;}
+
+</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
+  // Try popup first; if blocked, fall back to downloading an .html the user can open & print
+  let w=null;
+  try{w=window.open('','_blank');}catch(e){}
+  if(w&&w.document){
+    w.document.open();w.document.write(doc);w.document.close();
+    toast('Report dibuka — pilih "Save as PDF" di dialog print');
+  }else{
+    const blob=new Blob([doc],{type:'text/html'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(p.name)+'-report.html';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    toast('Popup diblokir — file report.html diunduh. Buka file itu lalu Ctrl/Cmd+P → Save as PDF','info');
+  }
+}
+function exportCSV(){
+  const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
+  const rows=[['Source','Cluster','Funnel','Slug','LastMod','URL'],...p.result.items.map(i=>[i.source,i.cluster,i.funnel,i.slug,i.lastmod,i.url])];
+  const csv=rows.map(r=>r.map(c=>{const s=String(c==null?'':c);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\n');
+  dlBlob(safeName(p.name)+'.csv',new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));toast('CSV diunduh!');
+}
+
+/* ============================================================
+   DEMO
+   ============================================================ */
+function loadDemo(){
+  if(!P())newProject();const p=P();
+  p.name='Demo — Niche Furniture & Roofing';
+  p.mine={label:'Situs Saya',mode:'paste',url:'',paste:`<urlset>
+<url><loc>https://mysite.com/blog/jenis-atap-rumah-minimalis</loc><lastmod>2026-03-10</lastmod></url>
+<url><loc>https://mysite.com/blog/tips-memilih-sofa-ruang-tamu</loc><lastmod>2026-04-01</lastmod></url>
+<url><loc>https://mysite.com/produk/meja-kayu-jati</loc><lastmod>2026-02-15</lastmod></url>
+</urlset>`};
+  p.comps=[
+    {id:uid(),label:'Kompetitor A',mode:'paste',url:'',paste:`<urlset>
+<url><loc>https://kompetitor-a.com/blog/atap-upvc-anti-bocor-terbaik</loc><lastmod>2026-05-01</lastmod></url>
+<url><loc>https://kompetitor-a.com/blog/kelebihan-atap-upvc-vs-galvalum</loc><lastmod>2026-05-10</lastmod></url>
+<url><loc>https://kompetitor-a.com/blog/cara-pasang-atap-upvc</loc><lastmod>2026-04-20</lastmod></url>
+<url><loc>https://kompetitor-a.com/blog/harga-atap-upvc-per-meter</loc><lastmod>2026-05-15</lastmod></url>
+<url><loc>https://kompetitor-a.com/blog/sofa-minimalis-ruang-kecil</loc><lastmod>2026-03-01</lastmod></url>
+<url><loc>https://kompetitor-a.com/blog/tips-merawat-sofa-kulit</loc><lastmod>2026-02-10</lastmod></url>
+<url><loc>https://kompetitor-a.com/produk/atap-upvc-2-lapis</loc><lastmod>2026-05-20</lastmod></url>
+<url><loc>https://kompetitor-a.com/produk/atap-upvc-transparan</loc><lastmod>2026-05-18</lastmod></url>
+</urlset>`},
+    {id:uid(),label:'Kompetitor B',mode:'paste',url:'',paste:`URL\tImages\tLast Mod.
+https://kompetitor-b.com/artikel/kosakata-bahasa-jepang-sehari-hari
+3\t2026-05-22 10:00 +07:00
+https://kompetitor-b.com/artikel/belajar-kosakata-jepang-pemula
+2\t2026-05-19 09:00 +07:00
+https://kompetitor-b.com/artikel/100-kosakata-jepang-penting
+5\t2026-05-25 14:00 +07:00
+https://kompetitor-b.com/artikel/atap-upvc-untuk-kanopi
+1\t2026-05-21 08:00 +07:00
+https://kompetitor-b.com/artikel/perbandingan-atap-upvc-merk
+2\t2026-05-23 11:00 +07:00
+https://kompetitor-b.com/produk/kelas-bahasa-jepang-online
+0\t2026-05-12 00:00 +07:00`}
+  ];
+  persistProjects();renderProjects();loadProjInputs();
+  toast('Contoh data dimuat — klik Analisa Cluster. Tanpa Gemini key → rule-based; dengan key → cluster niche pintar.','info');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+$('viewTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curView=b.dataset.view;renderView();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mo.active').forEach(m=>m.classList.remove('active'));if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();syncPush();}});
+loadTheme();loadAll();
+if(!projects.length)newProject();else loadProjInputs();
+renderProjects();renderView();updatePills();updateSidebarStats();
+</script>
+</body>
+</html>
