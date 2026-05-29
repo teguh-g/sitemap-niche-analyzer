@@ -78,7 +78,6 @@ a{color:var(--acc);}
 .ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--acc);}
 .hint{font-size:9.5px;color:var(--tf);font-family:var(--m);margin-top:4px;line-height:1.5;}
 
-/* competitor source rows */
 .src{border:1px solid var(--bd);border-radius:var(--rs);padding:10px;margin-bottom:9px;background:var(--s2);position:relative;}
 .src.mine{border-color:var(--okBd);background:var(--okBg);}
 .src-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
@@ -93,6 +92,59 @@ a{color:var(--acc);}
 .src input.url{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:5px;color:var(--t);font-family:var(--m);font-size:10.5px;padding:7px;outline:none;}
 .src textarea:focus,.src input.url:focus{border-color:var(--acc);}
 .src-meta{font-size:9px;color:var(--tf);font-family:var(--m);margin-top:5px;}
+
+/* === FOLDER SYSTEM === */
+.folder-group{margin-bottom:1px;}
+.folder-group-header{padding:7px 9px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--td);transition:background .12s;margin-bottom:1px;position:relative;}
+.folder-group-header:hover{background:var(--s2);color:var(--t);}
+.folder-group-header .fg-toggle{width:14px;height:14px;display:flex;align-items:center;justify-content:center;transition:transform .15s;flex-shrink:0;}
+.folder-group-header .fg-toggle.open{transform:rotate(90deg);}
+.folder-group-header .fg-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.folder-group-header .fg-count{font-family:var(--m);font-size:9px;color:var(--tf);margin-right:4px;}
+.folder-group-header .fg-actions{display:none;gap:3px;}
+.folder-group-header:hover .fg-actions{display:flex;}
+.fg-actions button{background:none;border:none;color:var(--td);cursor:pointer;padding:2px;display:flex;align-items:center;}
+.fg-actions button:hover{color:var(--acc);}
+.fg-actions button.del:hover{color:var(--danger);}
+.folder-group-body{padding-left:12px;border-left:1px dashed var(--bd);margin-left:6px;}
+.folder-group.collapsed .folder-group-body{display:none;}
+
+.proj-item{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:500;transition:background .12s;position:relative;}
+.proj-item:hover{background:var(--s2);}
+.proj-item.active{background:var(--s2);border-left:2px solid var(--acc);padding-left:7px;}
+.proj-item .pi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.proj-item .pi-count{font-family:var(--m);font-size:9px;color:var(--tf);}
+.proj-item .pi-actions{display:none;gap:3px;}
+.proj-item:hover .pi-actions{display:flex;}
+.pi-actions button{background:none;border:none;color:var(--td);cursor:pointer;padding:2px;display:flex;align-items:center;}
+.pi-actions button:hover{color:var(--danger);}
+
+.fd-pin-btn{background:none;border:none;color:var(--tf);cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;transition:color .15s;opacity:0;}
+.proj-item:hover .fd-pin-btn,
+.folder-group-header:hover .fd-pin-btn{opacity:1;}
+.fd-pin-btn:hover{color:var(--warn);}
+.fd-pin-btn.active{opacity:1;color:var(--warn);}
+.fd-pin-btn.active:hover{color:var(--td);}
+
+.proj-item[draggable="true"],
+.folder-group-header[draggable="true"]{cursor:grab;}
+.proj-item.dragging,
+.folder-group-header.dragging{opacity:.4;}
+.folder-group-header.drop-target{background:var(--accBg) !important;outline:2px dashed var(--acc);outline-offset:-2px;color:var(--acc) !important;}
+.folder-root-drop{padding:8px 12px;margin-top:6px;border:1px dashed transparent;border-radius:6px;font-size:10px;color:var(--tf);text-align:center;transition:all .15s;}
+.folder-root-drop.drop-target{border-color:var(--acc);background:var(--accBg);color:var(--acc);}
+
+.fd-insert-line{position:absolute;left:6px;right:6px;height:2px;background:var(--acc);border-radius:1px;pointer-events:none;display:none;z-index:50;box-shadow:0 0 4px var(--acc);}
+.fd-insert-line.show{display:block;}
+.fd-insert-line::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--acc);}
+
+.ctx-menu{position:fixed;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);box-shadow:0 4px 12px rgba(0,0,0,0.25);padding:4px 0;min-width:160px;z-index:9999;font-size:11.5px;font-family:var(--f);color:var(--t);}
+.ctx-menu div{padding:8px 12px;cursor:pointer;display:flex;align-items:center;transition:background 0.12s;}
+.ctx-menu div:hover{background:var(--s3);}
+.ctx-menu .del{color:var(--danger);}
+.ctx-menu .del:hover{background:rgba(255,90,90,0.1);}
+.ctx-divider{height:1px !important;background:var(--bd) !important;margin:4px 0 !important;padding:0 !important;cursor:default !important;}
+.ctx-menu svg{width:13px;height:13px;margin-right:7px;flex-shrink:0;}
 
 .tb{padding:8px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--s1);flex-shrink:0;gap:10px;}
 .vt{display:flex;background:var(--s2);border-radius:var(--rs);overflow:hidden;border:1px solid var(--bd);flex-wrap:wrap;}
@@ -141,7 +193,6 @@ a{color:var(--acc);}
 .toast{position:fixed;bottom:18px;right:18px;font-weight:600;font-size:11.5px;padding:10px 17px;border-radius:var(--rs);z-index:2000;transform:translateY(50px);opacity:0;transition:all .22s;max-width:440px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
 .toast.show{transform:translateY(0);opacity:1;}
 
-/* ===== results visual components ===== */
 .view-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
 .view-head h2{font-size:19px;font-weight:800;letter-spacing:-.4px;}
 .view-sub{font-size:11px;color:var(--td);font-family:var(--m);margin-top:4px;}
@@ -166,7 +217,6 @@ a{color:var(--acc);}
 .section-title{font-size:15px;font-weight:700;margin:26px 0 6px;display:flex;align-items:center;gap:8px;}
 .section-desc{font-size:11.5px;color:var(--td);margin-bottom:15px;line-height:1.5;max-width:760px;}
 
-/* cluster cards */
 .cl-grid{display:flex;flex-direction:column;gap:11px;}
 .cl-card{border:1px solid var(--bd);border-radius:var(--r);background:var(--s1);overflow:hidden;transition:border-color .15s;}
 .cl-card:hover{border-color:var(--bd2);}
@@ -184,7 +234,6 @@ a{color:var(--acc);}
 .badge.tofu{background:rgba(91,155,255,.14);color:var(--tofu);}
 .badge.mofu{background:rgba(251,181,40,.14);color:var(--mofu);}
 .badge.bofu{background:rgba(62,224,164,.14);color:var(--bofu);}
-/* stacked share bar per source */
 .cl-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--s2);margin:0 16px 12px;}
 .cl-bar span{height:100%;}
 .cl-body{border-top:1px solid var(--bd);padding:0;display:none;}
@@ -203,7 +252,6 @@ a{color:var(--acc);}
 .cl-url .fn.mofu{background:rgba(251,181,40,.16);color:var(--mofu);}
 .cl-url .fn.bofu{background:rgba(62,224,164,.16);color:var(--bofu);}
 
-/* matrix table */
 .tbl-wrap{overflow:auto;border:1px solid var(--bd);border-radius:var(--r);max-height:calc(100vh - 260px);}
 table.dt{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px;}
 table.dt th,table.dt td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--bd);}
@@ -243,7 +291,6 @@ table.dt td a{color:var(--acc);text-decoration:none;}table.dt td a:hover{text-de
 .hist-card .ht{font-family:var(--m);font-size:9.5px;color:var(--tf);}
 .hist-chips{display:flex;flex-wrap:wrap;gap:5px;}
 
-/* ---- minimalist additions ---- */
 .note{display:flex;gap:9px;align-items:flex-start;background:var(--s1);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;margin-bottom:18px;font-size:11.5px;color:var(--td);line-height:1.55;}
 .note .ic{color:var(--acc);flex-shrink:0;margin-top:1px;}
 .note b{color:var(--t);font-weight:600;}
@@ -261,37 +308,28 @@ table.dt td a{color:var(--acc);text-decoration:none;}table.dt td a:hover{text-de
 .fcount{font-size:11px;color:var(--td);font-family:var(--m);align-self:center;}
 .stat{box-shadow:none;}
 .insight{box-shadow:none;}
-/* tone down heavy shadows for minimalist look */
 .cl-card,.hist-card{box-shadow:none;}
-
 
 .taxo-tips p{font-size:11.5px;color:var(--td);line-height:1.6;margin-bottom:9px;}
 .taxo-tips b{color:var(--t);}
 .prompt-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;font-family:var(--m);font-size:10.5px;line-height:1.6;color:var(--t);white-space:pre-wrap;max-height:160px;overflow-y:auto;}
 
-
-/* custom select caret (appearance:none removes native one) */
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238892a4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px !important;cursor:pointer;}
-/* Mac: 100vh robustness + momentum scroll */
 .content,.side,.tbl-wrap{-webkit-overflow-scrolling:touch;}
 input,textarea,select{font-family:inherit;}
 
-
-/* iOS Safari: use fill-available only where supported & only on touch, avoids Chrome scroll bug */
 @supports (-webkit-touch-callout: none){
   body{height:-webkit-fill-available;}
 }
-
 
 .pdf-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:6px;}
 .pdf-opts label{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t);cursor:pointer;padding:8px 11px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--s2);transition:border .12s;}
 .pdf-opts label:hover{border-color:var(--accBd);}
 .pdf-opts input{width:auto;accent-color:var(--acc);-webkit-appearance:auto;appearance:auto;}
-
 </style>
 </head>
 <body>
-<header class="hdr">
+  <header class="hdr">
   <h1><span class="hdr-dot"></span>Sitemap Niche Gap Analyzer</h1>
   <div class="hdr-actions">
     <div class="st-pill off" id="aiSt" onclick="openSettings()" title="Status Gemini"><span class="sd"></span><span id="aiLbl">AI: off</span></div>
@@ -309,10 +347,13 @@ input,textarea,select{font-family:inherit;}
   <aside class="side">
     <div class="side-sec">
       <h3><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Analisa</span>
-        <button class="btn btn-g btn-sm" style="padding:3px 9px;" onclick="newProject()">+ Baru</button>
+        <span style="display:flex;gap:4px;">
+          <button class="btn btn-g btn-sm" style="padding:3px 8px;" onclick="addFolderItem(null)" title="Buat folder baru">📁+</button>
+          <button class="btn btn-g btn-sm" style="padding:3px 9px;" onclick="newProject()">+ Baru</button>
+        </span>
       </h3>
       <div class="ig"><label>Nama analisa</label><input type="text" id="inName" placeholder="mis. Niche Furniture Bali" oninput="syncNameToProj()"></div>
-      <div id="projList" style="display:flex;flex-direction:column;gap:3px;"></div>
+      <div id="projList" style="display:flex;flex-direction:column;gap:2px;position:relative;"></div>
     </div>
 
     <div class="side-sec">
@@ -468,20 +509,63 @@ input,textarea,select{font-family:inherit;}
   </div>
 </div></div>
 
+<!-- Context menu untuk Project -->
+<div id="projCtxMenu" class="ctx-menu" style="display:none;">
+  <div onclick="projCtxRename()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rename
+  </div>
+  <div onclick="projCtxDup()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplicate
+  </div>
+  <div class="ctx-divider"></div>
+  <div onclick="projCtxMove()" id="projCtxMoveBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Pindah ke Folder...
+  </div>
+  <div onclick="projCtxMoveRoot()" id="projCtxMoveRootBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Pindah ke Root
+  </div>
+  <div class="ctx-divider"></div>
+  <div class="del" onclick="projCtxDel()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Hapus
+  </div>
+</div>
+
+<!-- Context menu untuk Folder -->
+<div id="folderCtxMenu" class="ctx-menu" style="display:none;">
+  <div onclick="folderCtxAddSub()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Buat Sub-folder
+  </div>
+  <div onclick="folderCtxRename()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rename Folder
+  </div>
+  <div class="ctx-divider"></div>
+  <div onclick="folderCtxMove()" id="folderCtxMoveBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Pindah ke Folder Lain...
+  </div>
+  <div onclick="folderCtxMoveRoot()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Pindah ke Root
+  </div>
+  <div class="ctx-divider"></div>
+  <div class="del" onclick="folderCtxDel()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Hapus Folder
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 /* ============================================================
    Sitemap Niche Gap Analyzer
-   - slug-only thematic clustering via Gemini (discovers niches)
-   - multi-key rotation + RPD tracking + history (localStorage)
-   - XML + TSV auto-parse, multi-competitor, optional own sitemap
    ============================================================ */
 
 const LS_PROJ='snga-projects', LS_SET='snga-settings', LS_THEME='snga-theme', LS_SYNC='snga-sync';
+const LS_FOLDERS='snga-folders', LS_EXPANDED='snga-expanded-folders';
 const RPD_LIMIT=20;
 const FUNNELS=['TOFU','MOFU','BOFU'];
 
 let projects=[], activeId=null, curView='clusters';
+let folders=[]; // [{id,name,parentFolderId,pinned,sortIdx}]
+let expandedFolders=new Set();
+let fdDragData=null;
 let settings={ aiKeys:[], aiActive:'', aiModel:'gemini-2.5-flash', aiUsage:{}, fetchMethod:'proxy', workerUrl:'' };
 let syncCfg={ token:'', gistId:'', autoPush:false, lastSync:null };
 let syncBusy=false, analysisBusy=false;
@@ -489,7 +573,7 @@ let syncBusy=false, analysisBusy=false;
 const $=id=>document.getElementById(id);
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
-// ---------- inline SVG icons (no emoji) ----------
+
 const ICONS={
   copy:'<path d="M9 9h10v10H9z"/><path d="M5 15V5h10"/>',
   doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
@@ -507,7 +591,7 @@ function ic(name,size){const s=size||14;return `<svg class="ic" width="${s}" hei
 function keyId(k){let h=0;for(let i=0;i<k.length;i++)h=((h<<5)-h+k.charCodeAt(i))|0;return 'k'+Math.abs(h);}
 function toast(msg,type){const t=$('toast');t.textContent=msg;t.style.background=type==='err'?'var(--danger)':type==='info'?'var(--acc)':'var(--ok)';t.style.color='#fff';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2700);}
 
-/* ---------- funnel rules (for slug) ---------- */
+/* ---------- funnel rules ---------- */
 const FUNNEL_KW={
   TOFU:['blog','what-is','what is','apa-itu','apa itu','guide','panduan','tutorial','cara','how-to','how to','glossary','glosarium','pengertian','definisi','arti','maksud','tips','trik','sejarah','manfaat','fungsi','kegunaan','jenis','macam','ragam','contoh','belajar','learn','pemula','dasar','adalah','mengenal','kenali','ide','inspirasi','listicle','perbedaan','beda','review','ulasan','news','berita','artikel','kenapa','mengapa','bagaimana','penyebab','gejala','ciri','tanda','sebab','akibat','dampak','pengaruh','penjelasan','memahami','pahami'],
   MOFU:['comparison','perbandingan','bandingkan','alternative','alternatif','versus','vs','use-case','solusi','solution','checklist','template','tool','tools','calculator','kalkulator','case-study','studi-kasus','for-','untuk-','services','layanan','jasa','rekomendasi','terbaik','best','top','pilihan','wajib','panduan-memilih','cara-memilih','tips-memilih','vs-','dibanding'],
@@ -522,7 +606,7 @@ function funnelOf(slug){
   return bs===0?'TOFU':best;
 }
 
-/* ---------- sitemap parsers (validated) ---------- */
+/* ---------- sitemap parsers ---------- */
 function parseXmlSitemap(text){
   const out=[];
   const blocks=text.match(/<url\b[\s\S]*?<\/url>/gi)||[];
@@ -563,7 +647,7 @@ function autoParse(text){
 function slugOf(url){try{const p=new URL(url);return decodeURIComponent(p.pathname+p.search).toLowerCase();}catch(e){return (url||'').toLowerCase();}}
 function hostOf(url){try{return new URL(url).hostname.replace(/^www\./,'');}catch(e){return '';}}
 
-/* ---------- fetch by URL (proxy/worker) ---------- */
+/* ---------- fetch by URL ---------- */
 const PROXIES=[u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy/?quest=${u}`];
 async function fetchSitemapUrl(url){
   if(settings.fetchMethod==='worker'&&settings.workerUrl){
@@ -587,7 +671,6 @@ function aiU(){
   return u;
 }
 function aiRecord(i,o){const u=aiU();u.rpd++;u.inTok+=i||0;u.outTok+=o||0;persistSettings();updatePills();}
-// pick a key with quota left; rotate if active is exhausted
 function pickUsableKey(){
   if(!settings.aiKeys.length)return null;
   const cur=settings.aiActive;
@@ -598,7 +681,7 @@ function pickUsableKey(){
   return null;
 }
 
-/* ---------- GEMINI: discover & assign niche clusters from slugs ---------- */
+/* ---------- GEMINI clustering ---------- */
 async function geminiCluster(slugList){
   const key=pickUsableKey();
   if(!key)throw new Error('Semua Gemini key kehabisan kuota harian (RPD). Tambah key di Settings.');
@@ -629,19 +712,15 @@ ${sample}`;
   return obj.assignments||[];
 }
 
-/* ---------- rule-based fallback clustering (from slug tokens) ---------- */
+/* ---------- rule-based clustering ---------- */
 const STOP=new Set('the a an of to for in on is and or with at by dan atau yang untuk dari pada dengan ini itu nya kah lah pun para suatu sebuah adalah dapat bisa akan saat ketika agar supaya html php aspx htm www com co id memilih pilih milih dalam luar tahun bulan hari batu cara tips trik panduan how guide tutorial apa kenapa mengapa bagaimana kapan dimana siapa mana semua setiap setelah sebelum antara melalui tentang seputar mengenai harus wajib paling lebih sangat cukup juga saja hanya kah jadi menjadi membuat membeli memakai menggunakan terbaik bagus murah mahah baru lama bisa boleh perlu butuh ingin mau adalah ialah yaitu yakni serta beserta maupun bukan tidak belum sudah telah sedang masih akan tetap selalu sering kadang jarang banyak sedikit beberapa segala aneka berbagai macam jenis ragam'.split(/\s+/));
-// directory segments that carry no topical meaning — dropped before tokenizing/matching
 const GENERIC_SEG=new Set(['id','en','jp','cn','blog','blogs','artikel','article','articles','post','posts','news','berita','read','baca','story','stories','page','pages','kategori','category','categories','tag','tags','p','c','index','home','beranda','detail','view','content','contents']);
-// returns the meaningful part of a slug (drops language + generic dirs)
 function meaningfulSlug(slug){
   const parts=decodeURIComponent(slug).replace(/\?.*$/,'').replace(/\.(html|php|aspx|htm)$/,'').split('/').filter(Boolean);
-  // drop language codes + generic directory segments (anywhere, not just first)
   const LANG=new Set(['id','en','jp','cn','my','sg','us','uk','idn','eng']);
   const kept=parts.filter(p=>{const lp=p.toLowerCase();return !GENERIC_SEG.has(lp)&&!LANG.has(lp);});
   return (kept.length?kept:parts).join('/');
 }
-// generic words that must NEVER form a cluster name, wherever they appear in the slug
 const GENERIC_TOKEN=new Set('article articles artikel blog blogs post posts story stories news berita read baca page pages kategori category categories tag tags index home beranda detail view content contents info informasi update updates list listicle galeri gallery media press release siaran event events campaign campaigns editorial inspirasi inspiration journal jurnal magazine majalah newsletter promo promosi collection koleksi koleksinya catalog katalog all semua other others lain lainnya new newest latest terbaru terkini popular populer trending featured unggulan pilihan recommended rekomendasi the of and or for with why how what when where who which that this these those your you our about into more most very just only also then than from guide tips trik tip cara panduan tutorial ultimate complete lengkap honest review ulasan vs versus best top wajib harus paling lebih sangat cukup adalah merupakan yaitu yakni dengan untuk dari pada dalam serta atau dan ini itu yang sebuah suatu para semua mengenai seputar tentang hal cara langkah step steps things ways idea ideas overview intro introduction basics dasar pengertian penjelasan'.split(/\s+/));
 function slugTokens(slug){
   return meaningfulSlug(slug).split(/[\/\-_]+/).map(t=>t.trim().toLowerCase())
@@ -650,7 +729,6 @@ function slugTokens(slug){
 function normClusterName(n){
   let s=(n||'').trim().replace(/\s+/g,' ');
   if(!s)return 'Lainnya';
-  // title-case-ish, keep acronyms
   return s.split(' ').map(w=>/^[A-Z0-9]{2,}$/.test(w)?w:(w.charAt(0).toUpperCase()+w.slice(1))).join(' ');
 }
 const DEFAULT_TAXO=`Perhiasan & Jewelry: perhiasan, jewelry, emas, berlian, cincin, kalung, gelang, anting, liontin, diamond, gold, platinum
@@ -662,7 +740,6 @@ Promo & Harga: promo, diskon, sale, cashback, cicilan, harga, voucher, cicil
 Store & Lokasi: toko, store, outlet, lokasi, cabang, mall, showroom, butik
 Layanan & Service: cleaning, service, resize, repair, buyback, trade, warranty, garansi`;
 
-// manual taxonomy clustering: assign each item to best-matching cluster by keyword overlap
 function manualCluster(items, taxoText){
   const taxo=(taxoText||'').split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
     const i=line.indexOf(':');if(i<0)return null;
@@ -679,7 +756,6 @@ function manualCluster(items, taxoText){
 }
 
 function ruleCluster(items){
-  // Build 2-3 token phrase frequencies. NO unigrams as cluster names.
   const phraseFreq={};
   const itemPhrases=items.map(it=>{
     const toks=slugTokens(it.slug);
@@ -694,18 +770,16 @@ function ruleCluster(items){
     let best=null,bestScore=0;
     phrases.forEach(p=>{
       const f=phraseFreq[p];
-      if(f<2)return; // must be shared by >=2 URLs
+      if(f<2)return;
       const wc=p.split(' ').length;
-      const score=f*(wc*wc); // prefer longer + more frequent phrases
+      const score=f*(wc*wc);
       if(score>bestScore){bestScore=score;best=p;}
     });
     const name=best?normClusterName(best):'Lainnya';
     (clusters[name]=clusters[name]||[]).push(it._idx);
   });
-  // merge clusters with <2 items into Lainnya, then cap to top 15 clusters
   let out=[];const small=[];
   Object.entries(clusters).forEach(([name,idxs])=>{if(name!=='Lainnya'&&idxs.length>=2)out.push({name,indices:idxs});else small.push(...idxs);});
-  // sort by size desc, keep top 15, merge the rest into Lainnya
   out.sort((a,b)=>b.indices.length-a.indices.length);
   const MAX_CLUSTERS=15;
   if(out.length>MAX_CLUSTERS){
@@ -722,7 +796,6 @@ async function runAnalysis(){
   if(analysisBusy)return;
   let p=P();if(!p){newProject();p=P();}
   collectInputsInto(p);
-  // gather sources
   const sources=[];
   if(p.mine && (p.mine.url||p.mine.paste)) sources.push({...p.mine,isMine:true,label:p.mine.label||'Saya'});
   p.comps.forEach(c=>{if(c.url||c.paste)sources.push({...c,isMine:false});});
@@ -736,7 +809,6 @@ async function runAnalysis(){
   const setProg=(msg,pct)=>{$('content').innerHTML=`<div class="es"><div class="progress-wrap"><div class="spin"></div><h4>${esc(msg)}</h4><div class="pbar"><div style="width:${pct||0}%"></div></div></div></div>`;};
 
   try{
-    // 1) ingest all sources
     let allItems=[]; let srcMeta=[];
     for(const src of sources){
       setProg('Membaca sitemap: '+(src.label||'sumber'),10);
@@ -755,7 +827,6 @@ async function runAnalysis(){
     }
     if(!allItems.length){toast('Tidak ada URL konten setelah filter. Longgarkan ignore pattern.','err');analysisBusy=false;btn.disabled=false;btn.textContent='Analisa Cluster';return;}
 
-    // 2) cluster — engine: rule | manual | gemini
     let aiCount=0;
     const engine=p.engine||'rule';
     if(engine==='gemini'&&settings.aiActive){
@@ -785,7 +856,6 @@ async function runAnalysis(){
       allItems.forEach(it=>{if(!it.cluster)it.cluster='Lainnya';});
     }
 
-    // 3) store result
     p.result={ items:allItems, srcMeta, aiCount, usedAI:(p.engine==='gemini'&&aiCount>0), engine:(p.engine||'rule'), at:Date.now() };
     p.analyzedAt=Date.now();
     pushHistory(p);
@@ -799,14 +869,13 @@ async function runAnalysis(){
   }finally{analysisBusy=false;btn.disabled=false;btn.textContent='Analisa Cluster';updatePills();}
 }
 
-/* ---------- cluster aggregation for rendering ---------- */
+/* ---------- aggregation ---------- */
 function aggregate(p){
   const items=p.result.items;
   items.forEach(i=>{ i.cluster = normClusterName(i.cluster||'Lainnya'); });
-  // merge clusters that differ only by case/spacing → canonical display name = most frequent variant
-  const variants={}; // lowerkey -> {name->count}
+  const variants={};
   items.forEach(i=>{const k=i.cluster.toLowerCase().replace(/\s+/g,' ').trim();(variants[k]=variants[k]||{})[i.cluster]=(variants[k][i.cluster]||0)+1;});
-  const canon={}; // lowerkey -> chosen display name
+  const canon={};
   Object.entries(variants).forEach(([k,m])=>{canon[k]=Object.entries(m).sort((a,b)=>b[1]-a[1])[0][0];});
   items.forEach(i=>{const k=i.cluster.toLowerCase().replace(/\s+/g,' ').trim();i.cluster=canon[k];});
   const meta=p.result.srcMeta||[];
@@ -825,7 +894,6 @@ function aggregate(p){
     return {name,total:inCl.length,items:inCl,bySrc,mineCount,compCount,funnel,isGap};
   }).sort((a,b)=>b.total-a.total);
   const compLabels=srcLabels.filter(s=>s!==mineLabel);
-  // per-cluster gap status (only meaningful if mine exists)
   const clusterStatus={};
   clusters.forEach(c=>{
     let st='AMAN';
@@ -840,7 +908,7 @@ function aggregate(p){
   });
   return {clusters,srcLabels,compLabels,mineLabel,clusterStatus};
 }
-// ---------- SVG donut chart ----------
+
 function donutSVG(data, opts){
   opts=opts||{};const size=opts.size||190,stroke=opts.stroke||34,cx=size/2,cy=size/2,r=(size-stroke)/2;
   const total=data.reduce((s,d)=>s+d.value,0)||1;
@@ -864,7 +932,6 @@ function donutBlock(title,data,opts){
 }
 const DONUT_COLORS=['#5b9bff','#fbb528','#3ee0a4','#a78bfa','#ff8fab','#4dd0e1','#ffab40','#9ccc65','#ef5a8c','#7c9cff','#26c6da','#d4a843'];
 
-// ---------- copy any text (with fallback for file://) ----------
 function copyText(txt,label){
   if(!txt){toast('Kosong','err');return;}
   const done=()=>toast((label||'Teks')+' tersalin!');
@@ -881,7 +948,6 @@ function copyText(txt,label){
   }else fallback();
 }
 
-// ---------- universal PDF export (per-view or full) ----------
 function buildClusterText(p){
   const {clusters,srcLabels,mineLabel}=aggregate(p);
   let t='';
@@ -896,6 +962,406 @@ const SRC_COLORS=['#5b9bff','#fbb528','#3ee0a4','#a78bfa','#ff8fab','#4dd0e1','#
 function srcColor(srcLabels,label){const i=srcLabels.indexOf(label);return SRC_COLORS[i%SRC_COLORS.length];}
 
 /* ============================================================
+   FOLDER HELPERS
+   ============================================================ */
+function getFolderById(id){return folders.find(f=>f.id===id);}
+function fdSortCompare(a,b){
+  if(a.pinned&&!b.pinned)return -1;
+  if(!a.pinned&&b.pinned)return 1;
+  const sa=a.sortIdx||0,sb=b.sortIdx||0;
+  if(sa!==sb)return sa-sb;
+  return (a.name||'').localeCompare(b.name||'');
+}
+function getProjectsInFolder(folderId){return projects.filter(p=>p.folderId===folderId).sort(fdSortCompare);}
+function getFoldersInFolder(parentId){return folders.filter(f=>f.parentFolderId===parentId).sort(fdSortCompare);}
+function isFolderDescendant(ancestorId,folderId){
+  let cur=folderId,guard=0;
+  while(cur&&guard++<99){
+    if(cur===ancestorId)return true;
+    const f=getFolderById(cur);
+    cur=f?f.parentFolderId:null;
+  }
+  return false;
+}
+function toggleFolderExpand(folderId){
+  if(expandedFolders.has(folderId))expandedFolders.delete(folderId);
+  else expandedFolders.add(folderId);
+  persistFolders();renderProjects();
+}
+function addFolderItem(parentFolderId){
+  const name=prompt('Nama folder:');
+  if(!name||!name.trim())return;
+  const f={id:'f_'+uid(),name:name.trim(),parentFolderId:parentFolderId||null,pinned:false,sortIdx:Date.now()};
+  folders.push(f);
+  expandedFolders.add(f.id);
+  if(parentFolderId)expandedFolders.add(parentFolderId);
+  persistFolders();renderProjects();
+  toast('Folder dibuat');
+}
+function renameFolderItem(folderId){
+  const f=getFolderById(folderId);if(!f)return;
+  const n=prompt('Rename folder:',f.name);
+  if(!n||!n.trim())return;
+  f.name=n.trim();
+  persistFolders();renderProjects();
+}
+function deleteFolderItem(folderId){
+  const f=getFolderById(folderId);if(!f)return;
+  const projInside=getProjectsInFolder(folderId).length;
+  const subInside=getFoldersInFolder(folderId).length;
+  if(projInside||subInside){
+    if(!confirm(`Folder "${f.name}" punya ${projInside} analisa & ${subInside} sub-folder.\n\nIsinya dipindah ke parent. Lanjut?`))return;
+    getProjectsInFolder(folderId).forEach(p=>p.folderId=f.parentFolderId);
+    getFoldersInFolder(folderId).forEach(sf=>sf.parentFolderId=f.parentFolderId);
+  }else{
+    if(!confirm(`Hapus folder "${f.name}"?`))return;
+  }
+  folders=folders.filter(x=>x.id!==folderId);
+  expandedFolders.delete(folderId);
+  persistFolders();persistProjects();renderProjects();
+  toast('Folder dihapus');
+}
+function togglePin(type,id){
+  let item;
+  if(type==='project')item=projects.find(p=>p.id===id);
+  else item=getFolderById(id);
+  if(!item)return;
+  item.pinned=!item.pinned;
+  if(type==='project')persistProjects();else persistFolders();
+  renderProjects();
+  toast(item.pinned?`📌 "${item.name}" di-pin`:`Unpinned "${item.name}"`);
+}
+function persistFolders(){
+  try{
+    localStorage.setItem(LS_FOLDERS,JSON.stringify(folders));
+    localStorage.setItem(LS_EXPANDED,JSON.stringify([...expandedFolders]));
+  }catch(e){}
+}
+
+/* ============================================================
+   FOLDER DRAG & DROP
+   ============================================================ */
+function fdDragStart(e,type,id){
+  e.stopPropagation();
+  fdDragData={type,id};
+  e.dataTransfer.effectAllowed='move';
+  try{e.dataTransfer.setData('text/plain',type+':'+id);}catch(err){}
+  e.currentTarget.classList.add('dragging');
+}
+function fdDragEnd(e){
+  document.querySelectorAll('.dragging,.drop-target').forEach(el=>{
+    el.classList.remove('dragging');el.classList.remove('drop-target');
+  });
+  fdClearInsertIndicators();
+  fdDragData=null;
+}
+function fdDragOver(e,folderId){
+  if(!fdDragData)return;
+  if(fdDragData.type==='folder'){
+    if(fdDragData.id===folderId)return;
+    if(isFolderDescendant(fdDragData.id,folderId))return;
+  }
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect='move';
+  const rect=e.currentTarget.getBoundingClientRect();
+  const y=e.clientY-rect.top;
+  const zone=y<rect.height*0.25?'before':y>rect.height*0.75?'after':'inside';
+  fdClearInsertIndicators();
+  if(zone==='inside'){
+    e.currentTarget.classList.add('drop-target');
+  }else{
+    e.currentTarget.classList.remove('drop-target');
+    fdShowInsertLine(e.currentTarget,zone);
+  }
+  fdDragData._zone=zone;
+}
+function fdDragLeave(e){
+  e.currentTarget.classList.remove('drop-target');
+}
+function fdDrop(e,folderId){
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drop-target');
+  fdClearInsertIndicators();
+  if(!fdDragData)return;
+  const zone=fdDragData._zone||'inside';
+
+  if(zone==='before'||zone==='after'){
+    fdReorder(fdDragData.type,fdDragData.id,'folder',folderId,zone);
+    fdDragData=null;
+    return;
+  }
+
+  if(fdDragData.type==='project'){
+    const p=projects.find(x=>x.id===fdDragData.id);
+    if(!p){fdDragData=null;return;}
+    if(p.folderId===folderId){fdDragData=null;return;}
+    p.folderId=folderId;
+    expandedFolders.add(folderId);
+    persistProjects();persistFolders();renderProjects();
+    toast(`"${p.name}" dipindah`);
+  }else if(fdDragData.type==='folder'){
+    if(fdDragData.id===folderId){fdDragData=null;return;}
+    if(isFolderDescendant(fdDragData.id,folderId)){toast('Ga bisa pindahin folder ke dalam dirinya sendiri','err');fdDragData=null;return;}
+    const f=getFolderById(fdDragData.id);
+    if(!f){fdDragData=null;return;}
+    if(f.parentFolderId===folderId){fdDragData=null;return;}
+    f.parentFolderId=folderId;
+    expandedFolders.add(folderId);
+    persistFolders();renderProjects();
+    toast(`Folder "${f.name}" dipindah`);
+  }
+  fdDragData=null;
+}
+function fdDragOverProject(e,projId){
+  if(!fdDragData)return;
+  if(fdDragData.type==='project'&&fdDragData.id===projId)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect='move';
+  const rect=e.currentTarget.getBoundingClientRect();
+  const y=e.clientY-rect.top;
+  const zone=y<rect.height/2?'before':'after';
+  fdClearInsertIndicators();
+  fdShowInsertLine(e.currentTarget,zone);
+  fdDragData._zone=zone;
+}
+function fdDropProject(e,projId){
+  e.preventDefault();
+  e.stopPropagation();
+  fdClearInsertIndicators();
+  if(!fdDragData)return;
+  if(fdDragData.type==='project'&&fdDragData.id===projId){fdDragData=null;return;}
+  const zone=fdDragData._zone||'before';
+  fdReorder(fdDragData.type,fdDragData.id,'project',projId,zone);
+  fdDragData=null;
+}
+function fdDragOverRoot(e){
+  if(!fdDragData)return;
+  if(fdDragData.type==='project'){
+    const p=projects.find(x=>x.id===fdDragData.id);
+    if(!p||p.folderId===null)return;
+  }else{
+    const f=getFolderById(fdDragData.id);
+    if(!f||f.parentFolderId===null)return;
+  }
+  if(e.target.closest('.folder-group-header')||e.target.closest('.proj-item'))return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  document.getElementById('fdRootDropHint')?.classList.add('drop-target');
+}
+function fdDragLeaveRoot(e){
+  if(e.target.id==='fdRootZone'){
+    document.getElementById('fdRootDropHint')?.classList.remove('drop-target');
+  }
+}
+function fdDropRoot(e){
+  if(e.target.closest('.folder-group-header'))return;
+  e.preventDefault();
+  document.getElementById('fdRootDropHint')?.classList.remove('drop-target');
+  if(!fdDragData)return;
+  if(fdDragData.type==='project'){
+    const p=projects.find(x=>x.id===fdDragData.id);
+    if(!p||p.folderId===null){fdDragData=null;return;}
+    p.folderId=null;
+    persistProjects();renderProjects();
+    toast(`"${p.name}" dipindah ke root`);
+  }else{
+    const f=getFolderById(fdDragData.id);
+    if(!f||f.parentFolderId===null){fdDragData=null;return;}
+    f.parentFolderId=null;
+    persistFolders();renderProjects();
+    toast(`Folder "${f.name}" dipindah ke root`);
+  }
+  fdDragData=null;
+}
+function fdReorder(srcType,srcId,tgtType,tgtId,zone){
+  if(srcType==='folder'){
+    const tgtParent=tgtType==='folder'?getFolderById(tgtId)?.parentFolderId:null;
+    if(srcId===tgtId||(tgtParent&&isFolderDescendant(srcId,tgtParent))){
+      toast('Ga bisa reorder ke posisi itu','err');return;
+    }
+  }
+  let tgtParentFolder=null;
+  if(tgtType==='folder')tgtParentFolder=getFolderById(tgtId)?.parentFolderId;
+  else if(tgtType==='project')tgtParentFolder=projects.find(p=>p.id===tgtId)?.folderId;
+
+  let src;
+  if(srcType==='project')src=projects.find(p=>p.id===srcId);
+  else src=getFolderById(srcId);
+  if(!src)return;
+  if(srcType==='project')src.folderId=tgtParentFolder;
+  else src.parentFolderId=tgtParentFolder;
+
+  let siblings;
+  if(srcType==='project')siblings=projects.filter(p=>p.folderId===tgtParentFolder).sort((a,b)=>(a.sortIdx||0)-(b.sortIdx||0));
+  else siblings=folders.filter(f=>f.parentFolderId===tgtParentFolder).sort((a,b)=>(a.sortIdx||0)-(b.sortIdx||0));
+  siblings.forEach((s,i)=>s.sortIdx=(i+1)*100);
+
+  const tgt=siblings.find(s=>s.id===tgtId);
+  if(tgt){
+    if(zone==='before')src.sortIdx=tgt.sortIdx-50;
+    else src.sortIdx=tgt.sortIdx+50;
+  }
+  persistProjects();persistFolders();renderProjects();
+  toast(`"${src.name}" diatur ulang posisinya`);
+}
+function fdShowInsertLine(targetEl,zone){
+  const line=fdGetOrCreateInsertLine();
+  const rect=targetEl.getBoundingClientRect();
+  const parentRect=targetEl.offsetParent.getBoundingClientRect();
+  line.style.left=(rect.left-parentRect.left)+'px';
+  line.style.width=rect.width+'px';
+  if(zone==='before')line.style.top=(rect.top-parentRect.top-1)+'px';
+  else line.style.top=(rect.bottom-parentRect.top-1)+'px';
+  line.classList.add('show');
+}
+function fdClearInsertIndicators(){
+  const line=document.getElementById('fdInsertLine');
+  if(line)line.classList.remove('show');
+}
+function fdGetOrCreateInsertLine(){
+  let line=document.getElementById('fdInsertLine');
+  if(!line){
+    line=document.createElement('div');
+    line.id='fdInsertLine';
+    line.className='fd-insert-line';
+    document.getElementById('projList').appendChild(line);
+  }
+  return line;
+}
+
+/* ============================================================
+   CONTEXT MENUS
+   ============================================================ */
+let projCtxId=null;
+function showProjCtx(projId,e){
+  e.preventDefault();e.stopPropagation();
+  projCtxId=projId;
+  const m=document.getElementById('projCtxMenu');
+  m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';m.style.display='block';
+  const p=projects.find(x=>x.id===projId);
+  const rootBtn=document.getElementById('projCtxMoveRootBtn');
+  if(rootBtn)rootBtn.style.display=(p&&p.folderId)?'flex':'none';
+  const moveBtn=document.getElementById('projCtxMoveBtn');
+  if(moveBtn)moveBtn.style.display=folders.length?'flex':'none';
+}
+function closeProjCtx(){const m=document.getElementById('projCtxMenu');if(m)m.style.display='none';projCtxId=null;}
+function projCtxRename(){
+  if(!projCtxId)return;
+  const p=projects.find(x=>x.id===projCtxId);if(!p){closeProjCtx();return;}
+  const n=prompt('Rename analisa:',p.name);
+  if(n&&n.trim()){p.name=n.trim();persistProjects();renderProjects();if(p.id===activeId)$('inName').value=p.name;}
+  closeProjCtx();
+}
+function projCtxDup(){
+  if(!projCtxId){closeProjCtx();return;}
+  const orig=projects.find(x=>x.id===projCtxId);
+  if(!orig){closeProjCtx();return;}
+  const copy=JSON.parse(JSON.stringify(orig));
+  copy.id=uid();
+  copy.name=orig.name+' (copy)';
+  copy.createdAt=Date.now();
+  copy.pinned=false;
+  copy.sortIdx=Date.now();
+  projects.unshift(copy);
+  activeId=copy.id;
+  persistProjects();renderProjects();loadProjInputs();renderView();
+  closeProjCtx();
+  toast('Analisa diduplikasi');
+}
+function projCtxDel(){
+  if(!projCtxId){closeProjCtx();return;}
+  const id=projCtxId;closeProjCtx();
+  if(!confirm('Hapus analisa ini?'))return;
+  projects=projects.filter(p=>p.id!==id);
+  if(activeId===id)activeId=projects[0]?.id||null;
+  persistProjects();renderProjects();loadProjInputs();renderView();
+}
+function projCtxMoveRoot(){
+  if(!projCtxId){closeProjCtx();return;}
+  const p=projects.find(x=>x.id===projCtxId);if(!p){closeProjCtx();return;}
+  p.folderId=null;
+  persistProjects();renderProjects();
+  toast(`"${p.name}" dipindah ke root`);
+  closeProjCtx();
+}
+function projCtxMove(){
+  if(!projCtxId){closeProjCtx();return;}
+  const p=projects.find(x=>x.id===projCtxId);if(!p){closeProjCtx();return;}
+  function folderPath(folderId){
+    const path=[];let cur=folderId,guard=0;
+    while(cur&&guard++<99){
+      const f=getFolderById(cur);if(!f)break;
+      path.unshift(f.name);cur=f.parentFolderId;
+    }
+    return path.join(' / ');
+  }
+  if(!folders.length){toast('Belum ada folder','err');closeProjCtx();return;}
+  const choices=folders.map((f,i)=>`${i+1}. ${folderPath(f.id)}`).join('\n');
+  const choice=prompt(`Pindah "${p.name}" ke folder mana?\n\n${choices}\n\nKetik nomor:`);
+  if(!choice){closeProjCtx();return;}
+  const idx=parseInt(choice)-1;
+  if(idx<0||idx>=folders.length){toast('Nomor invalid','err');closeProjCtx();return;}
+  p.folderId=folders[idx].id;
+  expandedFolders.add(folders[idx].id);
+  persistProjects();persistFolders();renderProjects();
+  toast(`Dipindah ke "${folders[idx].name}"`);
+  closeProjCtx();
+}
+
+let folderCtxId=null;
+function showFolderCtx(folderId,e){
+  e.preventDefault();e.stopPropagation();
+  folderCtxId=folderId;
+  const m=document.getElementById('folderCtxMenu');
+  m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';m.style.display='block';
+  const moveBtn=document.getElementById('folderCtxMoveBtn');
+  if(moveBtn)moveBtn.style.display=folders.length>1?'flex':'none';
+}
+function closeFolderCtx(){const m=document.getElementById('folderCtxMenu');if(m)m.style.display='none';folderCtxId=null;}
+function folderCtxAddSub(){const id=folderCtxId;closeFolderCtx();if(id)addFolderItem(id);}
+function folderCtxRename(){const id=folderCtxId;closeFolderCtx();if(id)renameFolderItem(id);}
+function folderCtxDel(){const id=folderCtxId;closeFolderCtx();if(id)deleteFolderItem(id);}
+function folderCtxMoveRoot(){
+  if(!folderCtxId){closeFolderCtx();return;}
+  const f=getFolderById(folderCtxId);if(!f){closeFolderCtx();return;}
+  if(!f.parentFolderId){toast('Folder udah di root','err');closeFolderCtx();return;}
+  f.parentFolderId=null;
+  persistFolders();renderProjects();
+  toast(`Folder "${f.name}" dipindah ke root`);
+  closeFolderCtx();
+}
+function folderCtxMove(){
+  if(!folderCtxId){closeFolderCtx();return;}
+  const f=getFolderById(folderCtxId);if(!f){closeFolderCtx();return;}
+  function folderPath(folderId){
+    const path=[];let cur=folderId,guard=0;
+    while(cur&&guard++<99){
+      const ff=getFolderById(cur);if(!ff)break;
+      path.unshift(ff.name);cur=ff.parentFolderId;
+    }
+    return path.join(' / ');
+  }
+  const valid=folders.filter(x=>x.id!==f.id&&!isFolderDescendant(f.id,x.id));
+  if(!valid.length){toast('Ga ada folder tujuan valid','err');closeFolderCtx();return;}
+  const choices=valid.map((x,i)=>`${i+1}. ${folderPath(x.id)}`).join('\n');
+  const choice=prompt(`Pindah folder "${f.name}" ke mana?\n\n${choices}\n\nKetik nomor:`);
+  if(!choice){closeFolderCtx();return;}
+  const idx=parseInt(choice)-1;
+  if(idx<0||idx>=valid.length){toast('Nomor invalid','err');closeFolderCtx();return;}
+  f.parentFolderId=valid[idx].id;
+  expandedFolders.add(valid[idx].id);
+  persistFolders();renderProjects();
+  toast(`Folder dipindah`);
+  closeFolderCtx();
+}
+
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.ctx-menu')){closeProjCtx();closeFolderCtx();}
+});
+  /* ============================================================
    VIEWS
    ============================================================ */
 function renderView(){
@@ -925,14 +1391,12 @@ function renderClusters(p){
   const {clusters,srcLabels,mineLabel}=agg;
   const items=p.result.items;
   const compItems=items.filter(i=>!i.isMine);
-  // insights
   const topNiche=clusters.filter(c=>c.compCount>0)[0];
   const gaps=clusters.filter(c=>c.isGap);
   const fAll={TOFU:0,MOFU:0,BOFU:0};compItems.forEach(i=>fAll[i.funnel]++);
   const fTop=FUNNELS.sort((a,b)=>fAll[b]-fAll[a])[0];
   const fMap={TOFU:'edukasi/awareness (main di traffic atas funnel)',MOFU:'pertimbangan (konten komparasi & solusi)',BOFU:'konversi (dorong pembelian/aksi)'};
   const ins=[];
-  // per-competitor top niche (real names)
   const compLabels=agg.compLabels;
   compLabels.forEach(cl=>{
     const clItems=compItems.filter(i=>i.source===cl);
@@ -941,9 +1405,7 @@ function renderClusters(p){
     const top=Object.entries(byCl).sort((a,b)=>b[1]-a[1])[0];
     if(top)ins.push(`<b>${esc(cl)}</b> paling fokus di niche <b>${esc(top[0])}</b> (${top[1]} artikel).`);
   });
-  // funnel skew
   ins.push(`Distribusi funnel gabungan kompetitor condong ke <b>${fTop}</b> (${Math.round(fAll[fTop]/Math.max(compItems.length,1)*100)}%) — ${fMap[fTop]}.`);
-  // gaps with names
   if(mineLabel){
     if(gaps.length)ins.push(`<b>Saya</b> (${esc(mineLabel)}) punya <b>${gaps.length} niche gap</b> — cluster yang kompetitor garap tapi belum disentuh. Lihat tab Gap Analysis.`);
     else ins.push(`<b>Saya</b> (${esc(mineLabel)}) sudah menyentuh semua niche yang digarap kompetitor.`);
@@ -964,7 +1426,6 @@ function renderClusters(p){
     <div class="stat-grid">${stat(clusters.length,'Niche cluster','a')}${stat(compItems.length,'URL kompetitor','g')}${stat(srcLabels.filter(s=>s!==mineLabel).length,'Kompetitor','p')}${stat(gaps.length||'—','Niche gap','w')}</div>
     <div class="insight"><h3>${ic('bolt')} Strategic Read</h3><ul>${ins.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
 
-  // donut charts: cluster distribution + funnel
   {
     const top=clusters.filter(c=>c.compCount>0).slice(0,11).map((c,i)=>({label:c.name,value:c.compCount,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
     const others=clusters.filter(c=>c.compCount>0).slice(11).reduce((s,c)=>s+c.compCount,0);
@@ -973,17 +1434,14 @@ function renderClusters(p){
     html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;" class="donut-row">${donutBlock('Distribusi Niche Cluster',top,{centerLabel:'artikel'})}${donutBlock('Distribusi Funnel',fd,{centerLabel:'artikel'})}</div>`;
   }
 
-  // legend of sources
   html+=`<div class="legend">${srcLabels.map(s=>`<span><span class="sw" style="background:${srcColor(srcLabels,s)}"></span>${esc(s)}${s===mineLabel?' (saya)':''}</span>`).join('')}</div>`;
   html+=`<div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;"><button class="btn btn-g btn-sm" onclick="copyText(buildClusterText(P()),'Breakdown')">${ic('copy',13)} Copy breakdown</button><button class="btn btn-acc btn-sm" onclick="exportPDF('clusters')">${ic('doc',13)} PDF view</button></div>`;
 
   html+=`<div class="cl-grid">`;
   clusters.forEach((c,ci)=>{
-    const maxBar=Math.max(...clusters.map(x=>x.total),1);
     const barSegs=srcLabels.map(s=>{const n=(c.bySrc[s]||[]).length;if(!n)return '';const w=n/c.total*100;return `<span style="width:${w}%;background:${srcColor(srcLabels,s)}" title="${esc(s)}: ${n}"></span>`;}).join('');
     const ftot=c.total||1;
     const fSeg=FUNNELS.map(f=>{const n=c.funnel[f];if(!n)return '';const w=n/ftot*100;return `<span class="f-${f.toLowerCase()}" style="width:${w}%" title="${f}: ${n}">${w>14?f:''}</span>`;}).join('');
-    // url groups by source
     const urlGroups=srcLabels.map(s=>{const arr=c.bySrc[s]||[];if(!arr.length)return '';return `<div class="cl-src-group"><div class="cl-src-h"><span class="dot" style="background:${srcColor(srcLabels,s)}"></span>${esc(s)} (${arr.length})</div>${arr.slice(0,40).map(it=>`<div class="cl-url"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.slug)}</a><span class="fn ${it.funnel.toLowerCase()}">${it.funnel}</span></div>`).join('')}${arr.length>40?`<div class="cl-url" style="color:var(--tf)">+${arr.length-40} lagi…</div>`:''}</div>`;}).join('');
     html+=`<div class="cl-card ${c.isGap?'gap':''}" id="cl-${ci}">
       <div class="cl-head" onclick="document.getElementById('cl-${ci}').classList.toggle('open')">
@@ -1007,7 +1465,6 @@ function renderClusters(p){
 
 function renderMatrix(p){
   const {clusters,srcLabels,compLabels,mineLabel}=aggregate(p);
-  // columns: mine (if any) first, then each competitor separately (NOT merged)
   const cols=(mineLabel?[mineLabel]:[]).concat(compLabels);
   let html=`<div class="view-head"><div><h2>Cluster Matrix</h2><div class="view-sub">Baris = niche · kolom = ${mineLabel?'Saya + ':''}tiap kompetitor terpisah · angka = jumlah artikel · klik sel untuk lihat URL</div></div>
     <div class="note">${ic('info')} <span>Jumlah artikel tiap niche (baris) per sumber (kolom). Klik angka untuk lihat daftar URL-nya. Berguna untuk lihat siapa kuat di niche apa.</span></div></div>`;
@@ -1019,7 +1476,6 @@ function renderMatrix(p){
       return `<td class="num" style="cursor:pointer;color:var(--acc);font-weight:700;" onclick="showCellUrls('${esc(c.name).replace(/'/g,"")}','${esc(s).replace(/'/g,"")}')" title="klik lihat URL">${n}</td>`;
     }).join('')}<td class="num"><b>${c.total}</b></td></tr>`;
   });
-  // total row per column
   html+=`<tr style="border-top:2px solid var(--bd2)"><td><b>TOTAL</b></td>${cols.map(s=>`<td class="num"><b>${p.result.items.filter(i=>i.source===s).length}</b></td>`).join('')}<td class="num"><b>${p.result.items.length}</b></td></tr>`;
   html+=`</tbody></table></div>`;
   html+=`<div id="cellUrls" style="margin-top:16px;"></div>`;
@@ -1041,7 +1497,6 @@ function renderGap(p){
     <div class="note">${ic('info')} <span>Ringkasan per-niche: cluster mana yang kompetitor punya tapi kamu lemah/kosong. Untuk daftar keyword spesifik yang belum kamu punya, buka tab <b>Content Gap</b>.</span></div><div class="es" style="height:auto;padding:50px;"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="9" cy="10" r="4"/><circle cx="17" cy="17" r="3"/></svg><h4>Belum ada sitemap kamu</h4><p>Gap analysis butuh "Sitemap Saya" diisi supaya bisa membandingkan niche yang kompetitor punya tapi kamu belum. Isi di panel kiri lalu analisa ulang.</p></div>`;
     return;
   }
-  // priority: gap (compCount desc) → under (mine < comp) → covered
   const rows=clusters.map(c=>{
     let prio,cls;
     if(c.mineCount===0&&c.compCount>=2){prio='GAP';cls='p-crit';}
@@ -1073,22 +1528,19 @@ function kwClean(slug){
   if(kw.length<5)return '';
   return kw;
 }
-// token-set similarity (Jaccard) between two slugs — for accurate "mirip dengan URL mana"
 function simScore(aTokens,bTokens){
   if(!aTokens.size||!bTokens.size)return 0;
   let inter=0;aTokens.forEach(t=>{if(bTokens.has(t))inter++;});
-  return inter/(aTokens.size+bTokens.size-inter); // Jaccard
+  return inter/(aTokens.size+bTokens.size-inter);
 }
 function renderKeywords(p){
   const agg=aggregate(p);
-  const {clusters,mineLabel,clusterStatus}=agg;
+  const {clusters,mineLabel}=agg;
   const items=p.result.items;
-  // my footprint: exact keyword set + per-URL token sets (for similarity)
   const myKw=new Set();
-  const myUrls=[]; // {url,slug,kw,tokens}
+  const myUrls=[];
   if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const toks=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({url:it.url,slug:it.slug,kw:k,tokens:toks});});}
 
-  // per-URL rows from competitors
   const rows=[];const seen=new Set();
   clusters.forEach(c=>{
     c.items.filter(i=>!i.isMine).forEach(it=>{
@@ -1099,7 +1551,6 @@ function renderKeywords(p){
       if(mineLabel){
         if(myKw.has(key)){match='have';}
         else{
-          // find my most similar URL
           let best=null,bestS=0;
           myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bestS){bestS=sc;best=mu;}});
           simPct=Math.round(bestS*100);
@@ -1148,7 +1599,6 @@ function renderKeywords(p){
     <input type="text" id="kwSearch" placeholder="cari…" value="${esc(fText)}" oninput="renderView()">
     <span class="fcount">${view.length}</span></div>`;
 
-  // table — column headers have a small copy icon
   const ch=(label,col)=>`<th>${esc(label)} <span class="colcopy" onclick="copyCol('${col}')" title="Copy kolom ${esc(label)}">${ic('copy',12)}</span></th>`;
   const showSim=(!mineLabel)?false:(fMatch==='similar'||fMatch==='all');
   html+=`<div class="tbl-wrap"><table class="dt"><thead><tr>${ch('Keyword','kw')}${ch('Niche','cluster')}<th>Funnel</th>${mineLabel?'<th>Status</th>':''}${showSim?'<th>Mirip dengan (URL kamu)</th>':''}<th class="num">Sumber</th>${ch('URL Kompetitor','url')}</tr></thead><tbody>`;
@@ -1170,14 +1620,10 @@ function copyCol(which){
   else{txt=v.map(r=>r.kw).join('\n');label='Keyword';}
   copyText(txt,label);
 }
-function setKwTab(t){window._kwTab=t;renderView();}
-function copyKw(which){const t=which==='gap'?(window._kwGap||''):(window._kwAll||'');copyText(t,(which==='gap'?'Gap':'Semua')+' keyword');}
-function copyAllKeywords(){const t=window._kwCopyText||'';if(!t){toast('Tidak ada keyword','err');return;}navigator.clipboard.writeText(t).then(()=>toast('Keyword tersalin ke clipboard!')).catch(()=>{const a=$('kwCopyArea');if(a){a.select();document.execCommand('copy');toast('Tersalin!');}});}
 
 function renderTimeline(p){
   const items=p.result.items;
   const {clusters,mineLabel}=aggregate(p);
-  // build per-source monthly counts + conclusions
   const bySrc={};
   items.forEach(i=>{
     if(!i.lastmod)return;const m=i.lastmod.match(/(\d{4})-(\d{2})/);if(!m)return;
@@ -1191,7 +1637,6 @@ function renderTimeline(p){
     html+=`<div class="es" style="height:auto;padding:50px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h4>Tidak ada tanggal lastmod</h4><p>Sitemap yang kamu input tidak memuat tanggal modifikasi, jadi analisis publikasi tidak tersedia.</p></div>`;
     $('content').innerHTML=html;return;
   }
-  // conclusions per source
   const now=new Date();const months3=new Date(now.getFullYear(),now.getMonth()-3,1);
   const concl=[];
   const srcLabels=[...new Set(withDates.map(i=>i.source))];
@@ -1203,25 +1648,21 @@ function renderTimeline(p){
     const newest=dates[dates.length-1],oldest=dates[0];
     const recent=arr.filter(i=>{const d=new Date(i.lastmod.replace(' ','T'));return !isNaN(d)&&d>=months3;});
     const recentPct=Math.round(recent.length/arr.length*100);
-    // dominant recent cluster
     const recCl={};recent.forEach(i=>recCl[i.cluster]=(recCl[i.cluster]||0)+1);
     const topRecent=Object.entries(recCl).sort((a,b)=>b[1]-a[1])[0];
     const monthsSpan=Math.max(1,Math.round((newest-oldest)/(1000*60*60*24*30)));
     const rate=(arr.length/monthsSpan).toFixed(1);
     concl.push({s,total:arr.length,newest,oldest,recentPct,topRecent,rate,monthsSpan,isMine:s===mineLabel});
   });
-  // overall most active
   concl.sort((a,b)=>b.recentPct-a.recentPct);
   const fmt=d=>d.toLocaleDateString('id-ID',{month:'short',year:'numeric'});
   html+=`<div class="insight"><h3>${ic('calendar')} Ringkasan Publikasi</h3><ul>`;
   if(concl[0])html+=`<li>Paling aktif belakangan: <b>${esc(concl[0].s)}</b> — ${concl[0].recentPct}% kontennya diperbarui dalam 3 bulan terakhir${concl[0].topRecent?`, fokus terbaru di niche <b>${esc(concl[0].topRecent[0])}</b>`:''}.</li>`;
   const slow=concl[concl.length-1];if(slow&&concl.length>1)html+=`<li>Paling jarang update: <b>${esc(slow.s)}</b> — hanya ${slow.recentPct}% konten baru, kemungkinan sedang tidak agresif di konten.</li>`;
   html+=`</ul></div>`;
-  // ===== 30-day recent articles, grouped by cluster =====
   const nowTs=Date.now();const ms30=nowTs-30*24*3600*1000;
   const recent=withDates.filter(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));return !isNaN(d)&&d.getTime()>=ms30;});
   if(recent.length){
-    // group by cluster
     const byCl={};recent.forEach(i=>(byCl[i.cluster]=byCl[i.cluster]||[]).push(i));
     const sortedCl=Object.entries(byCl).sort((a,b)=>b[1].length-a[1].length);
     html+=`<div class="section-title">${ic('calendar')} Artikel 30 hari terakhir <span style="font-weight:400;color:var(--td);font-size:11px;">(${recent.length} URL, dari tgl analisa) — dikelompokkan per niche</span></div>`;
@@ -1242,7 +1683,6 @@ function renderTimeline(p){
     html+=`<div class="section-title">${ic('calendar')} Artikel 30 hari terakhir</div><div style="color:var(--td);font-size:12px;margin-bottom:18px;">Tidak ada artikel yang diperbarui dalam 30 hari terakhir dari tanggal analisa.</div>`;
   }
 
-  // per-source cards
   html+=`<div class="section-title">Detail per sumber</div><div class="cl-grid">`;
   concl.forEach(c=>{
     html+=`<div class="cl-card"><div class="cl-head" style="cursor:default">
@@ -1276,7 +1716,6 @@ function renderUrls(p){
   });
   html+=`</tbody></table></div>`;
   $('content').innerHTML=html;
-  // re-focus filter
   const fi=$('urlFilter');if(fi&&f){fi.focus();fi.setSelectionRange(fi.value.length,fi.value.length);}
 }
 
@@ -1286,7 +1725,6 @@ function renderHistory(p){
     <div class="note">${ic('info')} <span>Snapshot tiap analisa. Bandingkan dari waktu ke waktu untuk lihat niche baru yang muncul atau hilang dari kompetitor.</span></div></div>`;
   if(!snaps.length){html+=`<div class="es" style="height:auto;padding:50px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h4>Belum ada snapshot</h4><p>Tiap kali kamu klik Analisa, ringkasannya otomatis tersimpan di sini. Analisa beberapa kali (mis. tiap bulan) untuk melihat niche baru yang muncul.</p></div>`;$('content').innerHTML=html;return;}
   const fmt=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  // diff newest vs prev
   if(snaps.length>1){
     const cur=snaps[0].clusters||{},prev=snaps[1].clusters||{};
     const newNiche=Object.keys(cur).filter(n=>!(n in prev));
@@ -1324,24 +1762,63 @@ function pushHistory(p){
    ============================================================ */
 function P(){return projects.find(p=>p.id===activeId);}
 function newProject(){
-  const p={id:uid(),name:$('inName').value.trim()||('Analisa '+(projects.length+1)),mine:{label:'Saya',mode:'paste',url:'',paste:''},comps:[{id:uid(),label:'Kompetitor 1',mode:'paste',url:'',paste:''}],engine:'manual',taxo:DEFAULT_TAXO,result:null,history:[],createdAt:Date.now()};
+  const p={id:uid(),name:$('inName').value.trim()||('Analisa '+(projects.length+1)),mine:{label:'Saya',mode:'paste',url:'',paste:''},comps:[{id:uid(),label:'Kompetitor 1',mode:'paste',url:'',paste:''}],engine:'manual',taxo:DEFAULT_TAXO,result:null,history:[],createdAt:Date.now(),folderId:null,pinned:false,sortIdx:Date.now()};
   projects.unshift(p);activeId=p.id;persistProjects();renderProjects();loadProjInputs();renderView();
 }
 function selProject(id){activeId=id;loadProjInputs();renderProjects();renderView();updateSidebarStats();}
 function delProject(id,e){e.stopPropagation();if(!confirm('Hapus analisa ini?'))return;projects=projects.filter(p=>p.id!==id);if(activeId===id)activeId=projects[0]?.id||null;persistProjects();renderProjects();loadProjInputs();renderView();}
+
 function renderProjects(){
   const el=$('projList');
-  if(!projects.length){el.innerHTML='<div class="hint">Belum ada analisa.</div>';return;}
-  el.innerHTML=projects.map(p=>`<div onclick="selProject('${p.id}')" style="display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:500;${p.id===activeId?'background:var(--s2);border-left:2px solid var(--acc);':''}">
-    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--td)" stroke-width="2"><circle cx="9" cy="10" r="3"/><circle cx="16" cy="14" r="2.5"/></svg>
-    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.name)}</span>
-    <span style="font-family:var(--m);font-size:9px;color:var(--tf)">${p.result?p.result.items.length:0}</span>
-    <button onclick="delProject('${p.id}',event)" style="background:none;border:none;color:var(--td);cursor:pointer;padding:0 2px;" title="Hapus">×</button>
-  </div>`).join('');
+  if(!projects.length&&!folders.length){
+    el.innerHTML='<div class="hint">Belum ada analisa.</div>';
+    return;
+  }
+  el.innerHTML=`<div id="fdRootZone" ondragover="fdDragOverRoot(event)" ondragleave="fdDragLeaveRoot(event)" ondrop="fdDropRoot(event)">
+    ${renderFolderLevel(null)}
+    <div class="folder-root-drop" id="fdRootDropHint">⤓ Drop di sini untuk pindah ke root</div>
+  </div>`;
 }
+
+function renderFolderLevel(parentFolderId){
+  const subfolders=getFoldersInFolder(parentFolderId);
+  const projectsHere=getProjectsInFolder(parentFolderId);
+  let html='';
+  subfolders.forEach(f=>{
+    const isExpanded=expandedFolders.has(f.id);
+    const childCount=getProjectsInFolder(f.id).length+getFoldersInFolder(f.id).length;
+    html+=`<div class="folder-group ${isExpanded?'':'collapsed'}" data-folder-id="${f.id}">
+      <div class="folder-group-header" draggable="true" ondragstart="fdDragStart(event,'folder','${f.id}')" ondragend="fdDragEnd(event)" ondragover="fdDragOver(event,'${f.id}')" ondragleave="fdDragLeave(event)" ondrop="fdDrop(event,'${f.id}')" onclick="toggleFolderExpand('${f.id}')" oncontextmenu="showFolderCtx('${f.id}',event)">
+        <span class="fg-toggle ${isExpanded?'open':''}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--warn);"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span class="fg-name">${esc(f.name)}</span>
+        <span class="fg-count">${childCount}</span>
+        <button class="fd-pin-btn ${f.pinned?'active':''}" onclick="event.stopPropagation();togglePin('folder','${f.id}')" title="${f.pinned?'Unpin':'Pin ke atas'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="${f.pinned?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+        <span class="fg-actions">
+          <button onclick="event.stopPropagation();addFolderItem('${f.id}')" title="Sub-folder"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button onclick="event.stopPropagation();renameFolderItem('${f.id}')" title="Rename"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="del" onclick="event.stopPropagation();deleteFolderItem('${f.id}')" title="Hapus"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>
+        </span>
+      </div>
+      <div class="folder-group-body">${renderFolderLevel(f.id)}</div>
+    </div>`;
+  });
+  projectsHere.forEach(p=>{
+    html+=`<div class="proj-item ${p.id===activeId?'active':''}" data-project-id="${p.id}" draggable="true" ondragstart="fdDragStart(event,'project','${p.id}')" ondragend="fdDragEnd(event)" ondragover="fdDragOverProject(event,'${p.id}')" ondragleave="fdDragLeave(event)" ondrop="fdDropProject(event,'${p.id}')" onclick="selProject('${p.id}')" oncontextmenu="showProjCtx('${p.id}',event)">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--td)" stroke-width="2" style="flex-shrink:0;"><circle cx="9" cy="10" r="3"/><circle cx="16" cy="14" r="2.5"/></svg>
+      <span class="pi-name">${esc(p.name)}</span>
+      <span class="pi-count">${p.result?p.result.items.length:0}</span>
+      <button class="fd-pin-btn ${p.pinned?'active':''}" onclick="event.stopPropagation();togglePin('project','${p.id}')" title="${p.pinned?'Unpin':'Pin ke atas'}"><svg width="10" height="10" viewBox="0 0 24 24" fill="${p.pinned?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <span class="pi-actions">
+        <button onclick="event.stopPropagation();delProject('${p.id}',event)" title="Hapus"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>
+      </span>
+    </div>`;
+  });
+  return html||'<div style="padding:6px 10px;font-size:10px;color:var(--tf);font-style:italic;">(kosong)</div>';
+}
+
 function syncNameToProj(){const p=P();if(p){p.name=$('inName').value.trim()||p.name;renderProjects();}}
 
-// ---- source row UI ----
 function srcRowHtml(src,isMine){
   const idAttr=isMine?'mine':src.id;
   return `<div class="src ${isMine?'mine':''}" data-src="${idAttr}">
@@ -1462,13 +1939,10 @@ function updatePills(){
 function timeAgo(t){let a=Math.floor((Date.now()-t)/1000);return a<60?'baru':a<3600?Math.floor(a/60)+'m':a<86400?Math.floor(a/3600)+'h':Math.floor(a/86400)+'d';}
 setInterval(updatePills,30000);
 function persistProjects(){
-  // estimate size; localStorage cap ~5MB. Degrade gracefully if too big.
   function trySave(data){try{localStorage.setItem(LS_PROJ,JSON.stringify(data));return true;}catch(e){return false;}}
   if(trySave(projects))return;
-  // 1) trim history on all projects to 5
   let clone=projects.map(p=>({...p,history:(p.history||[]).slice(0,5)}));
   if(trySave(clone)){projects.forEach((p,i)=>{p.history=clone[i].history;});toast('Storage hampir penuh — history lama dipangkas','info');return;}
-  // 2) drop heavy items[] from all but the active project, keep a lightweight summary
   clone=projects.map(p=>{
     if(p.id===activeId||!p.result)return {...p,history:(p.history||[]).slice(0,5)};
     const r=p.result;
@@ -1476,7 +1950,6 @@ function persistProjects(){
       result:{...r,items:[],_trimmed:true,_count:(r.items||[]).length}};
   });
   if(trySave(clone)){toast('Storage penuh — data URL analisa non-aktif dipangkas (ringkasan tetap ada). Export dulu kalau perlu detailnya.','err');return;}
-  // 3) last resort: keep only active project
   const active=projects.find(p=>p.id===activeId);
   if(active&&trySave([active])){toast('Storage penuh — hanya analisa aktif yang disimpan. Hapus/expor analisa lama.','err');return;}
   toast('Storage penuh — gagal menyimpan. Export & hapus analisa lama.','err');
@@ -1486,6 +1959,19 @@ function loadAll(){
   try{const p=localStorage.getItem(LS_PROJ);if(p){projects=JSON.parse(p);if(projects.length)activeId=projects[0].id;}}catch(e){}
   try{const s=localStorage.getItem(LS_SET);if(s)settings={...settings,...JSON.parse(s)};}catch(e){}
   try{const sy=localStorage.getItem(LS_SYNC);if(sy)syncCfg={...syncCfg,...JSON.parse(sy)};}catch(e){}
+  try{const f=localStorage.getItem(LS_FOLDERS);if(f)folders=JSON.parse(f);}catch(e){}
+  try{const ex=localStorage.getItem(LS_EXPANDED);if(ex)expandedFolders=new Set(JSON.parse(ex));}catch(e){}
+  // Migration
+  projects.forEach(p=>{
+    if(!('folderId' in p))p.folderId=null;
+    if(!('pinned' in p))p.pinned=false;
+    if(!('sortIdx' in p))p.sortIdx=0;
+  });
+  folders.forEach(f=>{
+    if(!('pinned' in f))f.pinned=false;
+    if(!('sortIdx' in f))f.sortIdx=0;
+    if(!('parentFolderId' in f))f.parentFolderId=null;
+  });
 }
 
 /* ============================================================
@@ -1502,7 +1988,8 @@ async function syncPush(){
   if(!syncCfg.token||!syncCfg.gistId){toast('Setup sync dulu','err');openSyncMo();return;}
   if(syncBusy)return;syncBusy=true;updatePills();
   try{
-    const r=await fetch('https://api.github.com/gists/'+syncCfg.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncCfg.token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({files:{'sitemap-niche-analyzer.json':{content:JSON.stringify(projects,null,1)}}})});
+    const payload={projects,folders,expandedFolders:[...expandedFolders]};
+    const r=await fetch('https://api.github.com/gists/'+syncCfg.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncCfg.token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({files:{'sitemap-niche-analyzer.json':{content:JSON.stringify(payload,null,1)}}})});
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||('HTTP '+r.status));}
     syncCfg.lastSync=Date.now();saveSync();toast('Pushed ke cloud!');
   }catch(e){$('syncSt').className='st-pill err';toast('Push gagal: '+e.message,'err');}finally{syncBusy=false;updatePills();}
@@ -1515,8 +2002,19 @@ async function syncPull(){
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||('HTTP '+r.status));}
     const gist=await r.json();const file=gist.files['sitemap-niche-analyzer.json']||Object.values(gist.files)[0];if(!file)throw new Error('No data file');
     let content=file.content;if(file.truncated&&file.raw_url)content=await(await fetch(file.raw_url)).text();
-    const data=JSON.parse(content||'[]');projects=Array.isArray(data)?data:[];activeId=projects[0]?.id||null;
-    persistProjects();syncCfg.lastSync=Date.now();saveSync();renderProjects();loadProjInputs();renderView();updateSidebarStats();
+    const data=JSON.parse(content||'[]');
+    // Backward compat: format lama = array projects, format baru = {projects, folders, expandedFolders}
+    if(Array.isArray(data)){
+      projects=data;folders=[];expandedFolders=new Set();
+    }else{
+      projects=Array.isArray(data.projects)?data.projects:[];
+      folders=Array.isArray(data.folders)?data.folders:[];
+      expandedFolders=new Set(Array.isArray(data.expandedFolders)?data.expandedFolders:[]);
+    }
+    projects.forEach(p=>{if(!('folderId' in p))p.folderId=null;if(!('pinned' in p))p.pinned=false;if(!('sortIdx' in p))p.sortIdx=0;});
+    folders.forEach(f=>{if(!('pinned' in f))f.pinned=false;if(!('sortIdx' in f))f.sortIdx=0;if(!('parentFolderId' in f))f.parentFolderId=null;});
+    activeId=projects[0]?.id||null;
+    persistProjects();persistFolders();syncCfg.lastSync=Date.now();saveSync();renderProjects();loadProjInputs();renderView();updateSidebarStats();
     toast(`Pulled ${projects.length} analisa!`);
   }catch(e){$('syncSt').className='st-pill err';toast('Pull gagal: '+e.message,'err');}finally{syncBusy=false;updatePills();}
 }
@@ -1526,7 +2024,6 @@ async function syncPull(){
    ============================================================ */
 function safeName(s){return (s||'analisa').replace(/[^\w.-]+/g,'_').slice(0,50);}
 function dlBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-// ============ UNIVERSAL EXPORT (PDF/XLSX/CSV with feature picker) ============
 const EXPORT_FEATURES=[
   {id:'clusters',label:'Niche Clusters'},
   {id:'matrix',label:'Cluster Matrix'},
@@ -1543,7 +2040,6 @@ function openExport(kind){
   const subs={pdf:'Tiap fitur jadi satu bagian laporan PDF.',xlsx:'Tiap fitur jadi satu sheet terpisah.',csv:'Semua fitur digabung jadi 1 file CSV (ada kolom penanda fitur).'};
   $('exportTitle').textContent=titles[kind];
   $('exportSub').textContent=subs[kind];
-  // default: current view checked + clusters; if full, all
   $('exportOpts').innerHTML=EXPORT_FEATURES.map(f=>`<label><input type="checkbox" value="${f.id}" ${(f.id===curView||f.id==='clusters')?'checked':''}> ${esc(f.label)}</label>`).join('');
   $('exportRun').onclick=runExport;
   $('exportMo').classList.add('active');
@@ -1559,7 +2055,6 @@ function runExport(){
   else exportCSV(sel);
 }
 
-// shared data builders: each returns {head:[], rows:[[]]}
 function buildFeatureData(p,feat){
   const agg=aggregate(p);const {clusters,srcLabels,mineLabel,clusterStatus}=agg;const items=p.result.items;
   if(feat==='clusters'||feat==='matrix'){
@@ -1582,7 +2077,6 @@ function buildFeatureData(p,feat){
     const ms30=Date.now()-30*24*3600*1000;
     return {head:['Sumber','Niche','Funnel','Slug','LastMod','Baru30hari'],rows:wd.map(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));const baru=(!isNaN(d)&&d.getTime()>=ms30)?'YA':'';return [i.source,i.cluster,i.funnel,i.slug,i.lastmod,baru];})};
   }
-  // urls
   return {head:['Source','Cluster','Funnel','Slug','LastMod','URL'],rows:items.map(i=>[i.source,i.cluster,i.funnel,i.slug,i.lastmod,i.url])};
 }
 const FEAT_LABEL={clusters:'Niche Clusters',matrix:'Cluster Matrix',gap:'Gap Analysis',keywords:'Content Gap',timeline:'Publishing',urls:'URL Explorer'};
@@ -1592,7 +2086,6 @@ function exportXLSX(sel){
   const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
   if(typeof XLSX==='undefined'){toast('Library XLSX belum termuat','err');return;}
   sel=sel&&sel.length?sel:['clusters'];
-  // matrix duplicates clusters → skip if both selected
   const feats=sel.filter((f,i)=>!(f==='matrix'&&sel.includes('clusters')));
   const wb=XLSX.utils.book_new();let n=0;
   feats.forEach(f=>{
@@ -1611,179 +2104,157 @@ function exportPDF(scope){
   const items=p.result.items;
   const date=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
   const esc2=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  // scope can be: 'full' | a single view id (string) | an array of feature ids
   const selArr=Array.isArray(scope)?scope:null;
   const full=scope==='full';
   const want=sec=>full||(selArr?selArr.includes(sec):scope===sec);
   let body='';
   body+=`<section class="cover"><div class="brand">SITEMAP NICHE GAP ANALYSIS</div><h1>${esc2(p.name)}</h1><div class="meta">${date} · ${items.length} URL · ${clusters.length} cluster · engine: ${p.result.engine||'rule'}</div><div class="by">Disusun oleh Teguh Gunawan, S.Li.</div></section>`;
 
-  // ---- Niche Clusters ----
   if(want('clusters')){
     body+=`<section><h2>Niche Clusters</h2><table><tr><th>Niche</th>${srcLabels.map(s=>`<th>${esc2(s)}${s===mineLabel?' (saya)':''}</th>`).join('')}<th>Total</th><th>TOFU</th><th>MOFU</th><th>BOFU</th></tr>`;
     clusters.forEach(c=>{body+=`<tr><td><b>${esc2(c.name)}</b>${c.isGap?' [GAP]':''}</td>${srcLabels.map(s=>`<td>${(c.bySrc[s]||[]).length||''}</td>`).join('')}<td>${c.total}</td><td>${c.funnel.TOFU}</td><td>${c.funnel.MOFU}</td><td>${c.funnel.BOFU}</td></tr>`;});
     body+=`</table></section>`;
   }
-  // ---- Cluster Matrix (same data, but explicit) ----
   if(scope==='matrix'){
     body+=`<section><h2>Cluster Matrix</h2><table><tr><th>Niche</th>${srcLabels.map(s=>`<th>${esc2(s)}</th>`).join('')}<th>Total</th></tr>`;
     clusters.forEach(c=>{body+=`<tr><td>${esc2(c.name)}</td>${srcLabels.map(s=>`<td>${(c.bySrc[s]||[]).length||''}</td>`).join('')}<td>${c.total}</td></tr>`;});
     body+=`</table></section>`;
   }
-  // ---- Gap Analysis ----
   if(want('gap')&&mineLabel){
-    body+=`<section><h2>Gap Analysis (per niche)</h2><table><tr><th>Niche</th><th>Saya</th><th>Kompetitor</th><th>Status</th></tr>`;
-    clusters.forEach(c=>{const pr=clusterStatus[c.name]||'-';body+=`<tr><td>${esc2(c.name)}</td><td>${c.mineCount}</td><td>${c.compCount}</td><td>${pr}</td></tr>`;});
+    body+=`<section><h2>Gap Analysis (per niche)</h2><table><tr><th>Niche</th><th>Saya</th><th>Kompetitor</th><th>Status</th></tr>
+  ${clusters.map(c=>`<tr><td>${esc2(c.name)}</td><td>${c.mineCount}</td><td>${c.compCount}</td><td>${clusterStatus[c.name]||'-'}</td></tr>`).join('')}</table></section>`;
+  }
+  if(want('keywords')){
+    const {head,rows}=buildFeatureData(p,'keywords');
+    body+=`<section><h2>Content Gap (Keyword)</h2><table><tr>${head.map(h=>`<th>${esc2(h)}</th>`).join('')}</tr>`;
+    rows.slice(0,500).forEach(r=>{body+=`<tr>${r.map(c=>`<td>${esc2(c)}</td>`).join('')}</tr>`;});
+    if(rows.length>500)body+=`<tr><td colspan="${head.length}" style="text-align:center;color:#888;">+${rows.length-500} baris lagi (dipangkas untuk PDF)</td></tr>`;
     body+=`</table></section>`;
   }
-  // ---- Content Gap (keyword table, per-URL) ----
-  if(want('keywords')){
-    // rebuild gap rows like renderKeywords
-    const myKw=new Set(),myUrls=[];
-    if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const toks=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({slug:it.slug,tokens:toks});});}
-    const rows=[];const seen=new Set();
-    clusters.forEach(c=>{c.items.filter(i=>!i.isMine).forEach(it=>{const kw=kwClean(it.slug);if(!kw)return;const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);const toks=new Set(slugTokens(it.slug));let match='gap',simPct=0,simSlug='';if(mineLabel){if(myKw.has(key))match='have';else{let bestS=0,best=null;myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bestS){bestS=sc;best=mu;}});simPct=Math.round(bestS*100);if(bestS>=0.5){match='similar';simSlug=best?best.slug:'';}}}rows.push({kw,cluster:c.name,funnel:it.funnel,source:it.source,slug:it.slug,match,simPct,simSlug});});});
-    const showRows=mineLabel?rows.filter(r=>r.match==='gap'||r.match==='similar'):rows;
-    body+=`<section><h2>Content Gap${mineLabel?' (belum/mirip di sitemap kamu)':''}</h2>`;
-    if(mineLabel){const ng=rows.filter(r=>r.match==='gap').length,ns=rows.filter(r=>r.match==='similar').length,nh=rows.filter(r=>r.match==='have').length;body+=`<p>Gap murni: <b>${ng}</b> · Mirip: <b>${ns}</b> · Sudah ada: <b>${nh}</b> · Total rival: ${rows.length}</p>`;}
-    body+=`<table><tr><th>Keyword</th><th>Niche</th><th>Funnel</th>${mineLabel?'<th>Status</th><th>Mirip dgn (slug kamu)</th>':''}<th>Sumber</th></tr>`;
-    showRows.slice(0,500).forEach(r=>{body+=`<tr><td><b>${esc2(r.kw)}</b></td><td>${esc2(r.cluster)}</td><td>${r.funnel}</td>${mineLabel?`<td>${r.match==='gap'?'GAP':r.match==='similar'?('MIRIP '+r.simPct+'%'):'ADA'}</td><td style="font-size:8.5px;">${esc2(r.simSlug||'-')}</td>`:''}<td>${esc2(r.source)}</td></tr>`;});
-    body+=`</table>${showRows.length>500?'<p><i>… '+(showRows.length-500)+' baris lagi (lihat di app / export CSV)</i></p>':''}</section>`;
-  }
-  // ---- Publishing ----
   if(want('timeline')){
-    const withDates=items.filter(i=>i.lastmod&&/\d{4}-\d{2}/.test(i.lastmod));
-    body+=`<section><h2>Publishing</h2>`;
-    if(!withDates.length){body+=`<p>Tidak ada tanggal lastmod di sitemap.</p>`;}
-    else{
-      const nowTs=Date.now();const ms30=nowTs-30*24*3600*1000;
-      const recent=withDates.filter(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));return !isNaN(d)&&d.getTime()>=ms30;});
-      // per source summary
-      const srcs=[...new Set(withDates.map(i=>i.source))];
-      body+=`<table><tr><th>Sumber</th><th>URL bertanggal</th><th>Baru (30 hari)</th></tr>`;
-      srcs.forEach(s=>{const arr=withDates.filter(i=>i.source===s);const rec=recent.filter(i=>i.source===s).length;body+=`<tr><td>${esc2(s)}</td><td>${arr.length}</td><td>${rec} (${Math.round(rec/arr.length*100)}%)</td></tr>`;});
-      body+=`</table>`;
-      if(recent.length){
-        const byCl={};recent.forEach(i=>(byCl[i.cluster]=byCl[i.cluster]||[]).push(i));
-        body+=`<h3>Artikel 30 hari terakhir per niche (${recent.length})</h3>`;
-        Object.entries(byCl).sort((a,b)=>b[1].length-a[1].length).forEach(([cl,arr])=>{body+=`<p><b>${esc2(cl)} (${arr.length}):</b></p><ul>`;arr.slice(0,40).forEach(i=>{body+=`<li>${esc2(i.slug)} <i>[${esc2(i.source)} · ${esc2((i.lastmod||'').slice(0,10))}]</i></li>`;});body+=`</ul>`;});
-      }
+    const wd=items.filter(i=>i.lastmod&&/\d{4}-\d{2}/.test(i.lastmod));
+    const ms30=Date.now()-30*24*3600*1000;
+    const recent=wd.filter(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));return !isNaN(d)&&d.getTime()>=ms30;});
+    body+=`<section><h2>Publishing</h2><p style="font-size:11px;color:#555;">Total ${wd.length} URL bertanggal. ${recent.length} URL diperbarui dalam 30 hari terakhir.</p>`;
+    if(recent.length){
+      const byCl={};recent.forEach(i=>(byCl[i.cluster]=byCl[i.cluster]||[]).push(i));
+      Object.entries(byCl).sort((a,b)=>b[1].length-a[1].length).forEach(([cl,arr])=>{
+        body+=`<h3 style="font-size:12px;margin-top:10px;">${esc2(cl)} (${arr.length})</h3><table><tr><th>Sumber</th><th>Slug</th><th>Tanggal</th></tr>`;
+        arr.slice(0,40).forEach(it=>body+=`<tr><td>${esc2(it.source)}</td><td>${esc2(it.slug)}</td><td>${esc2((it.lastmod||'').slice(0,10))}</td></tr>`);
+        body+=`</table>`;
+      });
     }
     body+=`</section>`;
   }
-  // ---- URL Explorer (full list) ----
   if(want('urls')){
-    body+=`<section><h2>URL Explorer (${items.length})</h2><table><tr><th>Sumber</th><th>Niche</th><th>Funnel</th><th>Slug</th><th>Last Mod</th></tr>`;
-    items.slice(0,800).forEach(i=>{body+=`<tr><td>${esc2(i.source)}</td><td>${esc2(i.cluster)}</td><td>${i.funnel}</td><td style="font-size:8.5px;">${esc2(i.slug)}</td><td>${esc2((i.lastmod||'').slice(0,16))}</td></tr>`;});
-    body+=`</table>${items.length>800?'<p><i>… '+(items.length-800)+' URL lagi (export CSV untuk lengkap)</i></p>':''}</section>`;
-  }
-  // ---- breakdown (full only) ----
-  if(full){
-    body+=`<section><h2>URL Breakdown per Cluster</h2>`;
-    clusters.forEach(c=>{body+=`<h3>${esc2(c.name)} (${c.total})</h3>`;srcLabels.forEach(s=>{const arr=c.bySrc[s]||[];if(!arr.length)return;body+=`<p><b>${esc2(s)}:</b></p><ul>`;arr.slice(0,60).forEach(it=>{body+=`<li>${esc2(it.slug)} <i>(${it.funnel})</i></li>`;});body+=`</ul>`;});});
-    body+=`</section>`;
+    body+=`<section><h2>URL Explorer</h2><table><tr><th>Sumber</th><th>Niche</th><th>Funnel</th><th>Slug</th></tr>`;
+    items.slice(0,600).forEach(i=>body+=`<tr><td>${esc2(i.source)}</td><td>${esc2(i.cluster)}</td><td>${esc2(i.funnel)}</td><td>${esc2(i.slug)}</td></tr>`);
+    if(items.length>600)body+=`<tr><td colspan="4" style="text-align:center;color:#888;">+${items.length-600} URL lagi (dipangkas untuk PDF)</td></tr>`;
+    body+=`</table></section>`;
   }
 
-  const doc=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc2(p.name)} — Report</title><style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:-apple-system,BlinkMacSystemFont,Inter,Segoe UI,sans-serif;color:#1a1a1a;font-size:11px;line-height:1.5;-webkit-font-smoothing:antialiased;}
-    section{padding:22px 28px;page-break-inside:auto;}
-    .cover{height:90vh;display:flex;flex-direction:column;justify-content:center;border-left:6px solid #1d4ed8;page-break-after:always;}
-    .brand{font-size:11px;letter-spacing:3px;color:#1d4ed8;font-weight:700;margin-bottom:12px;}
-    .cover h1{font-size:32px;margin-bottom:12px;}.meta{color:#555;font-size:12px;margin-bottom:4px;}.by{margin-top:auto;color:#888;}
-    h2{font-size:17px;color:#1d4ed8;margin-bottom:11px;padding-bottom:6px;border-bottom:2px solid #e5e8ed;}
-    h3{font-size:13px;margin:12px 0 5px;}
-    table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:10px;}
-    th,td{border:1px solid #ddd;padding:4px 7px;text-align:left;vertical-align:top;}
-    th{background:#f1f3f7;font-weight:600;}
-    ul{margin:4px 0 8px 18px;}li{font-size:9.5px;margin-bottom:1px;}p{margin-bottom:4px;}
-    @media print{@page{margin:1cm;}}
-  
-/* iOS Safari: use fill-available only where supported & only on touch, avoids Chrome scroll bug */
-@supports (-webkit-touch-callout: none){
-  body{height:-webkit-fill-available;}
+  const doc=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc2(p.name)}</title>
+<style>
+  @page{size:A4;margin:18mm 14mm;}
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a;font-size:11px;line-height:1.55;margin:0;}
+  section{margin-bottom:22px;page-break-inside:avoid;}
+  .cover{text-align:center;padding:60px 20px 40px;border-bottom:2px solid #333;margin-bottom:30px;}
+  .cover .brand{font-size:10px;letter-spacing:2px;color:#666;font-weight:600;}
+  .cover h1{font-size:26px;margin:14px 0 8px;color:#000;}
+  .cover .meta{font-size:11px;color:#555;}
+  .cover .by{font-size:10px;color:#888;margin-top:18px;font-style:italic;}
+  h2{font-size:15px;margin:0 0 10px;color:#000;border-bottom:1px solid #ccc;padding-bottom:5px;}
+  h3{margin:8px 0 4px;}
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:10px;}
+  th,td{border:1px solid #ddd;padding:5px 7px;text-align:left;vertical-align:top;}
+  th{background:#f4f4f4;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.3px;}
+  tr:nth-child(even) td{background:#fafafa;}
+  @media print{.no-print{display:none;}body{margin:0;}}
+  .toolbar{position:fixed;top:10px;right:10px;background:#fff;border:1px solid #ccc;padding:8px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:12px;z-index:9999;}
+  .toolbar button{background:#1d4ed8;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;}
+</style></head><body>
+<div class="toolbar no-print"><button onclick="window.print()">🖨 Print / Save PDF</button></div>
+${body}
+</body></html>`;
+
+  const w=window.open('','_blank');
+  if(!w){toast('Browser blokir popup. Izinkan popup untuk export PDF.','err');return;}
+  w.document.write(doc);w.document.close();
+  setTimeout(()=>{try{w.print();}catch(e){}},700);
+  toast('PDF terbuka di tab baru — klik Print/Save PDF');
 }
 
-
-.pdf-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:6px;}
-.pdf-opts label{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t);cursor:pointer;padding:8px 11px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--s2);transition:border .12s;}
-.pdf-opts label:hover{border-color:var(--accBd);}
-.pdf-opts input{width:auto;accent-color:var(--acc);-webkit-appearance:auto;appearance:auto;}
-
-</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>`;
-  let w=null;
-  try{w=window.open('','_blank');}catch(e){}
-  if(w&&w.document){w.document.open();w.document.write(doc);w.document.close();toast('Report dibuka — pilih "Save as PDF" di dialog print');}
-  else{const blob=new Blob([doc],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(p.name)+'-report.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast('Popup diblokir — file report.html diunduh. Buka lalu Ctrl/Cmd+P → Save as PDF','info');}
-}
 function exportCSV(sel){
   const p=P();if(!p||!p.result){toast('Belum ada hasil','err');return;}
-  sel=sel&&sel.length?sel:['urls'];
-  const feats=sel.filter((f,i)=>!(f==='matrix'&&sel.includes('clusters')));
-  // combine all selected into ONE csv with a leading "Fitur" column.
-  // Different features have different columns → use a generic wide format: Fitur + Kolom1..N labeled per row block.
-  const blocks=[];
-  feats.forEach(f=>{
+  sel=sel&&sel.length?sel:['clusters'];
+  let csv='';
+  sel.forEach(f=>{
     const {head,rows}=buildFeatureData(p,f);
-    // header row for this block (prefixed with feature)
-    blocks.push(['=== '+(FEAT_LABEL[f]||f)+' ===']);
-    blocks.push(['Fitur',...head]);
-    rows.forEach(r=>blocks.push([FEAT_LABEL[f]||f,...r]));
-    blocks.push([]); // spacer
+    csv+=`\n# ${FEAT_LABEL[f]||f}\n`;
+    csv+=head.join(',')+'\n';
+    rows.forEach(r=>{csv+=r.map(c=>{let s=String(c==null?'':c);if(/[",\n]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s;}).join(',')+'\n';});
   });
-  const csv=blocks.map(r=>r.map(c=>{const s=String(c==null?'':c);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\n');
-  dlBlob(safeName(p.name)+'-export.csv',new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
-  toast('CSV ('+feats.length+' fitur) diunduh!');
+  dlBlob(safeName(p.name)+'.csv',new Blob([csv.trim()],{type:'text/csv;charset=utf-8'}));
+  toast('CSV diunduh!');
 }
 
 /* ============================================================
    DEMO
    ============================================================ */
 function loadDemo(){
-  if(!P())newProject();const p=P();
-  p.name='Demo — Niche Furniture & Roofing';
-  p.mine={label:'Situs Saya',mode:'paste',url:'',paste:`<urlset>
-<url><loc>https://mysite.com/blog/jenis-atap-rumah-minimalis</loc><lastmod>2026-03-10</lastmod></url>
-<url><loc>https://mysite.com/blog/tips-memilih-sofa-ruang-tamu</loc><lastmod>2026-04-01</lastmod></url>
-<url><loc>https://mysite.com/produk/meja-kayu-jati</loc><lastmod>2026-02-15</lastmod></url>
-</urlset>`};
+  let p=P();if(!p){newProject();p=P();}
+  p.name='Demo: Jewelry Niche';
+  p.mine={label:'Saya',mode:'paste',url:'',paste:`https://situs-saya.com/blog/cara-merawat-cincin-emas 2025-01-15
+https://situs-saya.com/blog/tips-memilih-perhiasan 2025-02-10
+https://situs-saya.com/produk/cincin-tunangan 2024-12-01
+https://situs-saya.com/edukasi/karat-emas-vs-platinum 2025-03-05`};
   p.comps=[
-    {id:uid(),label:'Kompetitor A',mode:'paste',url:'',paste:`<urlset>
-<url><loc>https://kompetitor-a.com/blog/atap-upvc-anti-bocor-terbaik</loc><lastmod>2026-05-01</lastmod></url>
-<url><loc>https://kompetitor-a.com/blog/kelebihan-atap-upvc-vs-galvalum</loc><lastmod>2026-05-10</lastmod></url>
-<url><loc>https://kompetitor-a.com/blog/cara-pasang-atap-upvc</loc><lastmod>2026-04-20</lastmod></url>
-<url><loc>https://kompetitor-a.com/blog/harga-atap-upvc-per-meter</loc><lastmod>2026-05-15</lastmod></url>
-<url><loc>https://kompetitor-a.com/blog/sofa-minimalis-ruang-kecil</loc><lastmod>2026-03-01</lastmod></url>
-<url><loc>https://kompetitor-a.com/blog/tips-merawat-sofa-kulit</loc><lastmod>2026-02-10</lastmod></url>
-<url><loc>https://kompetitor-a.com/produk/atap-upvc-2-lapis</loc><lastmod>2026-05-20</lastmod></url>
-<url><loc>https://kompetitor-a.com/produk/atap-upvc-transparan</loc><lastmod>2026-05-18</lastmod></url>
-</urlset>`},
-    {id:uid(),label:'Kompetitor B',mode:'paste',url:'',paste:`URL\tImages\tLast Mod.
-https://kompetitor-b.com/artikel/kosakata-bahasa-jepang-sehari-hari
-3\t2026-05-22 10:00 +07:00
-https://kompetitor-b.com/artikel/belajar-kosakata-jepang-pemula
-2\t2026-05-19 09:00 +07:00
-https://kompetitor-b.com/artikel/100-kosakata-jepang-penting
-5\t2026-05-25 14:00 +07:00
-https://kompetitor-b.com/artikel/atap-upvc-untuk-kanopi
-1\t2026-05-21 08:00 +07:00
-https://kompetitor-b.com/artikel/perbandingan-atap-upvc-merk
-2\t2026-05-23 11:00 +07:00
-https://kompetitor-b.com/produk/kelas-bahasa-jepang-online
-0\t2026-05-12 00:00 +07:00`}
+    {id:uid(),label:'Kompetitor A',mode:'paste',url:'',paste:`https://kompetitor-a.com/blog/wedding-ring-guide 2025-04-12
+https://kompetitor-a.com/blog/lamaran-tradisional-vs-modern 2025-04-20
+https://kompetitor-a.com/produk/cincin-berlian 2025-03-15
+https://kompetitor-a.com/edukasi/clarity-berlian 2025-05-01
+https://kompetitor-a.com/promo/diskon-bridal 2025-05-10
+https://kompetitor-a.com/produk/kalung-emas 2025-02-20
+https://kompetitor-a.com/blog/anniversary-gift-ideas 2025-05-05`},
+    {id:uid(),label:'Kompetitor B',mode:'paste',url:'',paste:`https://kompetitor-b.com/article/diamond-cut-explained 2025-03-22
+https://kompetitor-b.com/article/best-engagement-rings 2025-04-15
+https://kompetitor-b.com/product/luxury-bracelet 2025-04-01
+https://kompetitor-b.com/store/showroom-jakarta 2025-01-10
+https://kompetitor-b.com/service/cincin-resize 2025-02-08
+https://kompetitor-b.com/article/valentine-gift-jewelry 2025-05-12
+https://kompetitor-b.com/promo/cicilan-0-persen 2025-05-15`}
   ];
+  p.engine='manual';
+  p.taxo=DEFAULT_TAXO;
   persistProjects();renderProjects();loadProjInputs();
-  toast('Contoh data dimuat — klik Analisa Cluster. Tanpa Gemini key → rule-based; dengan key → cluster niche pintar.','info');
+  toast('Demo dimuat. Klik "Analisa Cluster" untuk lihat hasilnya.');
 }
 
 /* ============================================================
    INIT
    ============================================================ */
-$('viewTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curView=b.dataset.view;renderView();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mo.active').forEach(m=>m.classList.remove('active'));if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();syncPush();}});
-loadTheme();loadAll();
-if(!projects.length)newProject();else loadProjInputs();
-renderProjects();renderView();updatePills();updateSidebarStats();
+$('viewTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-view]');if(!b)return;
+  curView=b.dataset.view;renderView();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['settingsMo','syncMo','exportMo','taxoHelpMo'].forEach(id=>{const m=document.getElementById(id);if(m)m.classList.remove('active');});
+    closeProjCtx();closeFolderCtx();
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();if(P())runAnalysis();}
+});
+
+loadTheme();
+loadAll();
+if(!projects.length)newProject();
+else loadProjInputs();
+renderProjects();
+renderView();
+updatePills();
+updateSidebarStats();
+
 </script>
 </body>
 </html>
