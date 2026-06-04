@@ -404,6 +404,10 @@ input,textarea,select{font-family:inherit;}
         <button data-view="history">History</button>
       </div>
       <div class="tb-r">
+        <button class="btn btn-p btn-sm" onclick="exportInteractiveHTML()" title="Download file HTML interaktif">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share HTML
+        </button>
         <button class="btn btn-acc btn-sm" onclick="openExport('pdf')">PDF</button>
         <button class="btn btn-g btn-sm" onclick="openExport('xlsx')">XLSX</button>
         <button class="btn btn-g btn-sm" onclick="openExport('csv')">CSV</button>
@@ -1554,8 +1558,8 @@ function renderKeywords(p){
           let best=null,bestS=0;
           myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bestS){bestS=sc;best=mu;}});
           simPct=Math.round(bestS*100);
-          if(bestS>=0.5){match='similar';simUrl=best;}
-          else match='gap';
+              if(bestS>=0.65){match='similar';simUrl=best;}
+              else match='gap';
         }
       }
       rows.push({kw,cluster:c.name,funnel:it.funnel,source:it.source,url:it.url,slug:it.slug,match,simUrl,simPct});
@@ -2069,7 +2073,7 @@ function buildFeatureData(p,feat){
     const myKw=new Set(),myUrls=[];
     if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const t=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({slug:it.slug,tokens:t});});}
     const rows=[];const seen=new Set();
-    clusters.forEach(c=>c.items.filter(i=>!i.isMine).forEach(it=>{const kw=kwClean(it.slug);if(!kw)return;const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);const toks=new Set(slugTokens(it.slug));let match='gap',pct=0,sim='';if(mineLabel){if(myKw.has(key))match='have';else{let bs=0,b=null;myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bs){bs=sc;b=mu;}});pct=Math.round(bs*100);if(bs>=0.5){match='similar';sim=b?b.slug:'';}}}rows.push([kw,c.name,it.funnel,match==='gap'?'GAP':match==='similar'?('MIRIP '+pct+'%'):'ADA',sim,it.source,it.url]);}));
+    clusters.forEach(c=>c.items.filter(i=>!i.isMine).forEach(it=>{const kw=kwClean(it.slug);if(!kw)return;const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);const toks=new Set(slugTokens(it.slug));let match='gap',pct=0,sim='';if(mineLabel){if(myKw.has(key))match='have';else{let bs=0,b=null;myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bs){bs=sc;b=mu;}});pct=Math.round(bs*100);if(bs>=0.65){match='similar';sim=b?b.slug:'';}}}rows.push([kw,c.name,it.funnel,match==='gap'?'GAP':match==='similar'?('MIRIP '+pct+'%'):'ADA',sim,it.source,it.url]);}));
     return {head:['Keyword','Niche','Funnel','Status','MiripDgn','Sumber','URL'],rows};
   }
   if(feat==='timeline'){
@@ -2198,6 +2202,46 @@ function exportCSV(sel){
   dlBlob(safeName(p.name)+'.csv',new Blob([csv.trim()],{type:'text/csv;charset=utf-8'}));
   toast('CSV diunduh!');
 }
+/* ============================================================
+   FUNGSI SHARE HTML (INTERACTIVE)
+   ============================================================ */
+function exportInteractiveHTML() {
+  const p = P();
+  if (!p || !p.result) { 
+    toast('Belum ada hasil analisa untuk di-share', 'err'); 
+    return; 
+  }
+
+  const btn = event.currentTarget;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Generating...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    // 1. Ambil seluruh HTML dari aplikasi saat ini
+    let htmlContent = document.documentElement.outerHTML;
+
+    // 2. Suntikkan data proyek saat ini sebagai variabel global di dalam <head>
+    const injectData = `<script>window.__SHARED_PROJECT__ = ${JSON.stringify(p)};<\/script>`;
+    htmlContent = htmlContent.replace('<head>', '<head>\n' + injectData);
+
+    // 3. Jadikan format file HTML yang utuh
+    const finalHTML = '<!DOCTYPE html>\n' + htmlContent;
+    const blob = new Blob([finalHTML], { type: 'text/html;charset=utf-8' });
+    const fileName = safeName(p.name) + '_Interactive.html';
+
+    // 4. Trigger download
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    toast('File HTML berhasil di-generate!');
+  }, 100);
+}
 
 /* ============================================================
    DEMO
@@ -2247,13 +2291,44 @@ document.addEventListener('keydown',e=>{
 });
 
 loadTheme();
-loadAll();
-if(!projects.length)newProject();
-else loadProjInputs();
-renderProjects();
-renderView();
-updatePills();
-updateSidebarStats();
+
+if (window.__SHARED_PROJECT__) {
+  // --- MODE SHARE (READ-ONLY) ---
+  projects = [window.__SHARED_PROJECT__];
+  activeId = window.__SHARED_PROJECT__.id;
+  
+  // Matikan fungsi save supaya tidak menimpa LocalStorage komputer pembaca
+  window.persistProjects = function(){}; 
+  window.persistFolders = function(){};
+  window.persistSettings = function(){};
+  
+  // Bersihkan UI: Sembunyikan panel kiri dan tombol action di header
+  const sideEl = document.querySelector('.side');
+  if (sideEl) sideEl.style.display = 'none';
+  const hdrActions = document.querySelector('.hdr-actions');
+  if (hdrActions) hdrActions.style.display = 'none';
+  
+  // Atur ulang layout agar content main memenuhi layar
+  const layoutEl = document.querySelector('.layout');
+  if (layoutEl) layoutEl.style.gridTemplateColumns = '1fr';
+
+  loadProjInputs();
+  renderProjects();
+  renderView();
+  updateSidebarStats();
+  
+  setTimeout(() => toast('Mode Read-Only Interaktif', 'info'), 500);
+
+} else {
+  // --- MODE NORMAL (EDITOR) ---
+  loadAll();
+  if(!projects.length)newProject();
+  else loadProjInputs();
+  renderProjects();
+  renderView();
+  updatePills();
+  updateSidebarStats();
+}
 
 </script>
 </body>
