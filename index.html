@@ -742,19 +742,38 @@ Promo & Harga: promo, diskon, sale, cashback, cicilan, harga, voucher, cicil
 Store & Lokasi: toko, store, outlet, lokasi, cabang, mall, showroom, butik
 Layanan & Service: cleaning, service, resize, repair, buyback, trade, warranty, garansi`;
 
-function manualCluster(items, taxoText){
-  const taxo=(taxoText||'').split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
-    const i=line.indexOf(':');if(i<0)return null;
-    return {name:line.slice(0,i).trim(), kws:line.slice(i+1).split(',').map(k=>k.trim().toLowerCase()).filter(Boolean)};
+function manualCluster(items, taxoText) {
+  const taxo = (taxoText || '').split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const i = line.indexOf(':');
+    if (i < 0) return null;
+    return {
+      name: line.slice(0, i).trim(),
+      // Mengubah keyword taksonomi menjadi array token yang bersih
+      kws: line.slice(i + 1).split(',').map(k => k.trim().toLowerCase().replace(/[^a-z0-9]/g, ''))
+    };
   }).filter(Boolean);
-  const clusters={};
-  items.forEach(it=>{
-    const slug=meaningfulSlug(it.slug).toLowerCase().replace(/[-_]/g,' ');
-    let best='Lainnya',bs=0;
-    taxo.forEach(t=>{let sc=0;t.kws.forEach(kw=>{const k=kw.replace(/[-_]/g,' ');if(slug.includes(k))sc+=k.length;});if(sc>bs){bs=sc;best=t.name;}});
-    (clusters[best]=clusters[best]||[]).push(it._idx);
+
+  const clusters = {};
+  items.forEach(it => {
+    // Menggunakan slugTokens agar konsisten dengan logika pembersihan slug Anda
+    const tokens = slugTokens(it.slug); 
+    let best = 'Lainnya', bs = 0;
+
+    taxo.forEach(t => {
+      let sc = 0;
+      t.kws.forEach(kw => {
+        // Cek apakah ada kecocokan antara token URL dengan keyword taksonomi
+        if (tokens.some(tok => tok === kw || tok.includes(kw) || kw.includes(tok))) {
+          sc += kw.length; // Memberi bobot berdasarkan panjang kata kunci
+        }
+      });
+      if (sc > bs) { bs = sc; best = t.name; }
+    });
+
+    (clusters[best] = clusters[best] || []).push(it._idx);
   });
-  return Object.entries(clusters).map(([name,indices])=>({name,indices}));
+  
+  return Object.entries(clusters).map(([name, indices]) => ({ name, indices }));
 }
 
 function ruleCluster(items){
