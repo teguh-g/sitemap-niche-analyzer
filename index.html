@@ -1555,190 +1555,94 @@ function simScore(aTokens,bTokens){
   let inter=0;aTokens.forEach(t=>{if(bTokens.has(t))inter++;});
   return inter/(aTokens.size+bTokens.size-inter);
 }
-/* ---------- HELPER SCORING BARU (Mencegah False 100%) ---------- */
-function calculateRealSimilarity(slugA, slugB, tokensA, tokensB) {
-  // 1. Hitung Jaccard berdasarkan token inti
-  let intersection = 0;
-  tokensA.forEach(t => { if (tokensB.has(t)) intersection++; });
-  const totalTokens = tokensA.size + tokensB.size - intersection;
-  const jaccard = totalTokens > 0 ? (intersection / totalTokens) : 0;
-
-  // 2. Hitung kemiripan string mentah menggunakan normalized Levenshtein
-  const s1 = slugA.replace(/[\/_-]+/g, ' ').trim();
-  const s2 = slugB.replace(/[\/_-]+/g, ' ').trim();
-  
-  // Implementasi cepat Levenshtein
-  const track = Array(s2.length + 1).fill(null).map(() => Array(s1.length + 1).fill(null));
-  for (let i = 0; i <= s1.length; i += 1) track[0][i] = i;
-  for (let j = 0; j <= s2.length; j += 1) track[j][0] = j;
-  for (let j = 1; j <= s2.length; j += 1) {
-    for (let i = 1; i <= s1.length; i += 1) {
-      const indicator = s1[i - 1] === s2[j - 1] ? 0 : 1;
-      track[j][i] = Math.min(
-        track[j - 1][i] + 1, // deletion
-        track[j][i - 1] + 1, // insertion
-        track[j - 1][i - 1] + indicator // substitution
-      );
-    }
-  }
-  const distance = track[s2.length][s1.length];
-  const maxLen = Math.max(s1.length, s2.length);
-  const levScore = maxLen > 0 ? (1 - distance / maxLen) : 0;
-
-  // Gabungkan skor: 60% bobot String Mentah, 40% bobot Token Inti
-  // Ini menghentikan URL pendek mengklaim kemiripan 100% pada URL panjang
-  return (levScore * 0.6) + (jaccard * 0.4);
-}
-
-/* ---------- RENDER KEYWORDS TABLE (FIXED) ---------- */
 function renderKeywords(p){
-  const agg = aggregate(p);
-  const { clusters, mineLabel } = agg;
-  const items = p.result.items;
-  
-  const myKwMap = new Map(); // Simpan bukti URL untuk status ADA
-  const myUrls = [];
+  const agg=aggregate(p);
+  const {clusters,mineLabel}=agg;
+  const items=p.result.items;
+  const myKw=new Set();
+  const myUrls=[];
+  if(mineLabel){items.filter(i=>i.isMine).forEach(it=>{const k=kwClean(it.slug);const toks=new Set(slugTokens(it.slug));if(k)myKw.add(k.toLowerCase());myUrls.push({url:it.url,slug:it.slug,kw:k,tokens:toks});});}
 
-  if (mineLabel) {
-    items.filter(i => i.isMine).forEach(it => {
-      const k = kwClean(it.slug);
-      const toks = new Set(slugTokens(it.slug));
-      if (k) {
-        const key = k.toLowerCase();
-        // Simpan referensi objek URL saya berdasarkan keyword bersihnya
-        if (!myKwMap.has(key)) myKwMap.set(key, []);
-        myKwMap.get(key).push({ url: it.url, slug: it.slug });
-      }
-      myUrls.push({ url: it.url, slug: it.slug, kw: k, tokens: toks });
-    });
-  }
-
-  const rows = [];
-  const seen = new Set();
-  
-  clusters.forEach(c => {
-    c.items.filter(i => !i.isMine).forEach(it => {
-      const kw = kwClean(it.slug);
-      if (!kw) return;
-      const key = kw.toLowerCase();
-      if (seen.has(key)) return;
-      seen.add(key);
-      
-      const toks = new Set(slugTokens(it.slug));
-      let match = 'gap';
-      let targetUrlObj = null;
-      let simPct = 0;
-      
-      if (mineLabel) {
-        if (myKwMap.has(key)) {
-          match = 'have';
-          // Ambil bukti URL saya yang memiliki keyword sama persis
-          targetUrlObj = myKwMap.get(key)[0]; 
-        } else {
-          let bestScore = 0;
-          let bestMatchUrl = null;
-          
-          myUrls.forEach(mu => {
-            const score = calculateRealSimilarity(it.slug, mu.slug, toks, mu.tokens);
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatchUrl = mu;
-            }
-          });
-          
-          simPct = Math.round(bestScore * 100);
-          
-          // Menaikkan ambang batas ke 68% agar tidak agresif mencocokkan URL sampah
-          if (bestScore >= 0.68) {
-            match = 'similar';
-            targetUrlObj = bestMatchUrl;
-          } else {
-            match = 'gap';
-          }
+  const rows=[];const seen=new Set();
+  clusters.forEach(c=>{
+    c.items.filter(i=>!i.isMine).forEach(it=>{
+      const kw=kwClean(it.slug);if(!kw)return;
+      const key=kw.toLowerCase();if(seen.has(key))return;seen.add(key);
+      const toks=new Set(slugTokens(it.slug));
+      let match='gap',simUrl=null,simPct=0;
+      if(mineLabel){
+        if(myKw.has(key)){match='have';}
+        else{
+          let best=null,bestS=0;
+          myUrls.forEach(mu=>{const sc=simScore(toks,mu.tokens);if(sc>bestS){bestS=sc;best=mu;}});
+          simPct=Math.round(bestS*100);
+              if(bestS>=0.55){match='similar';simUrl=best;}
+              else match='gap';
         }
       }
-      rows.push({ kw, cluster: c.name, funnel: it.funnel, source: it.source, url: it.url, slug: it.slug, match, targetUrlObj, simPct });
+      rows.push({kw,cluster:c.name,funnel:it.funnel,source:it.source,url:it.url,slug:it.slug,match,simUrl,simPct});
     });
   });
 
-  const nGap = rows.filter(r => r.match === 'gap').length;
-  const nSim = rows.filter(r => r.match === 'similar').length;
-  const nHave = rows.filter(r => r.match === 'have').length;
+  const nGap=rows.filter(r=>r.match==='gap').length;
+  const nSim=rows.filter(r=>r.match==='similar').length;
+  const nHave=rows.filter(r=>r.match==='have').length;
 
-  const fMatch = $('kwMatch') ? $('kwMatch').value : (mineLabel ? 'gap' : 'all');
-  const fCluster = $('kwCluster') ? $('kwCluster').value : '';
-  const fFunnel = $('kwFunnel') ? $('kwFunnel').value : '';
-  const fText = $('kwSearch') ? $('kwSearch').value.toLowerCase() : '';
-  
-  let view = rows.slice();
-  if (mineLabel && fMatch !== 'all') view = view.filter(r => r.match === fMatch);
-  if (fCluster) view = view.filter(r => r.cluster === fCluster);
-  if (fFunnel) view = view.filter(r => r.funnel === fFunnel);
-  if (fText) view = view.filter(r => r.kw.toLowerCase().includes(fText) || r.slug.includes(fText));
-  
-  const clusterOpts = [...new Set(rows.map(r => r.cluster))];
+  const fMatch=$('kwMatch')?$('kwMatch').value:(mineLabel?'gap':'all');
+  const fCluster=$('kwCluster')?$('kwCluster').value:'';
+  const fFunnel=$('kwFunnel')?$('kwFunnel').value:'';
+  const fText=$('kwSearch')?$('kwSearch').value.toLowerCase():'';
+  let view=rows.slice();
+  if(mineLabel&&fMatch!=='all')view=view.filter(r=>r.match===fMatch);
+  if(fCluster)view=view.filter(r=>r.cluster===fCluster);
+  if(fFunnel)view=view.filter(r=>r.funnel===fFunnel);
+  if(fText)view=view.filter(r=>r.kw.toLowerCase().includes(fText)||r.slug.includes(fText));
+  const clusterOpts=[...new Set(rows.map(r=>r.cluster))];
 
-  let html = `<div class="view-head"><div><h2>Content Gap</h2><div class="view-sub">${mineLabel ? 'Keyword kompetitor vs sitemap kamu — per URL' : 'Keyword kompetitor (isi Sitemap Saya untuk gap)'}</div></div></div>`;
-  html += `<div class="note">${ic('info')} <span>Membandingkan struktur kata mentah dan token slug. <b>Gap</b> = Belum ada di sitemap Anda. <b>Mirip</b> = Ada konten menyerupai (kanibal/irisan). <b>Sudah ada</b> = Topik/keyword sama persis.</span></div>`;
+  let html=`<div class="view-head"><div><h2>Content Gap</h2><div class="view-sub">${mineLabel?'Keyword kompetitor vs sitemap kamu — per URL':'Keyword kompetitor (isi Sitemap Saya untuk gap)'}</div></div></div>`;
+  html+=`<div class="note">${ic('info')} <span>Membandingkan tiap URL kompetitor dengan sitemap kamu. <b>Gap</b> = belum ada padanannya. <b>Mirip</b> = ada URL kamu yang menyerupai (lihat kolom "Mirip dengan"). <b>Sudah ada</b> = keyword-nya sama persis. Cocokkan via token slug (Jaccard).</span></div>`;
 
-  if (mineLabel) {
-    html += `<div class="stat-grid mini">
-      <div class="stat" style="border-left:2px solid var(--danger)"><div class="n" style="color:var(--danger)">${nGap}</div><div class="l">Gap (Belum Ada)</div></div>
-      <div class="stat" style="border-left:2px solid var(--warn)"><div class="n" style="color:var(--warn)">${nSim}</div><div class="l">Mirip / Irisan</div></div>
-      <div class="stat" style="border-left:2px solid var(--ok)"><div class="n" style="color:var(--ok)">${nHave}</div><div class="l">Sudah Ada</div></div>
-      <div class="stat"><div class="n">${rows.length}</div><div class="l">Total Rival</div></div>
+  if(mineLabel){
+    html+=`<div class="stat-grid mini">
+      <div class="stat" style="border-left:2px solid var(--danger)"><div class="n" style="color:var(--danger)">${nGap}</div><div class="l">Gap (belum ada)</div></div>
+      <div class="stat" style="border-left:2px solid var(--warn)"><div class="n" style="color:var(--warn)">${nSim}</div><div class="l">Mirip</div></div>
+      <div class="stat" style="border-left:2px solid var(--ok)"><div class="n" style="color:var(--ok)">${nHave}</div><div class="l">Sudah ada</div></div>
+      <div class="stat"><div class="n">${rows.length}</div><div class="l">Total rival</div></div>
     </div>`;
   }
-  
-  html += `<div class="filter-bar">`;
-  if (mineLabel) {
-    html += `<select id="kwMatch" onchange="renderView()">
-      <option value="gap" ${fMatch === 'gap' ? 'selected' : ''}>Gap — belum ada</option>
-      <option value="similar" ${fMatch === 'similar' ? 'selected' : ''}>Mirip</option>
-      <option value="have" ${fMatch === 'have' ? 'selected' : ''}>Sudah ada</option>
-      <option value="all" ${fMatch === 'all' ? 'selected' : ''}>Semua</option></select>`;
-  }
-  html += `<select id="kwCluster" onchange="renderView()"><option value="">Semua niche</option>${clusterOpts.map(c => `<option ${fCluster === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
-    <select id="kwFunnel" onchange="renderView()"><option value="">Semua funnel</option>${FUNNELS.map(f => `<option ${fFunnel === f ? 'selected' : ''}>${f}</option>`).join('')}</select>
+  html+=`<div class="filter-bar">`;
+  if(mineLabel){html+=`<select id="kwMatch" onchange="renderView()">
+    <option value="gap" ${fMatch==='gap'?'selected':''}>Gap — belum ada</option>
+    <option value="similar" ${fMatch==='similar'?'selected':''}>Mirip</option>
+    <option value="have" ${fMatch==='have'?'selected':''}>Sudah ada</option>
+    <option value="all" ${fMatch==='all'?'selected':''}>Semua</option></select>`;}
+  html+=`<select id="kwCluster" onchange="renderView()"><option value="">Semua niche</option>${clusterOpts.map(c=>`<option ${fCluster===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <select id="kwFunnel" onchange="renderView()"><option value="">Semua funnel</option>${FUNNELS.map(f=>`<option ${fFunnel===f?'selected':''}>${f}</option>`).join('')}</select>
     <input type="text" id="kwSearch" placeholder="cari…" value="${esc(fText)}" oninput="renderView()">
     <span class="fcount">${view.length}</span></div>`;
 
-  const ch = (label, col) => `<th>${esc(label)} <span class="colcopy" onclick="copyCol('${col}')" title="Copy kolom ${esc(label)}">${ic('copy',12)}</span></th>`;
-  
-  html += `<div class="tbl-wrap"><table class="dt"><thead><tr>
-    ${ch('Keyword', 'kw')}
-    ${ch('Niche', 'cluster')}
-    <th>Funnel</th>
-    ${mineLabel ? '<th>Status</th>' : ''}
-    ${mineLabel ? '<th>URL Kamu (Sitemap Saya)</th>' : ''}
-    <th class="num">Sumber</th>
-    ${ch('URL Kompetitor', 'url')}
-  </tr></thead><tbody>`;
-  
-  const mBadge = r => r.match === 'gap' ? '<span class="tag danger">GAP</span>' : r.match === 'similar' ? `<span class="tag warn">MIRIP ${r.simPct}%</span>` : r.match === 'have' ? '<span class="tag ok">ADA</span>' : '';
-  
-  view.forEach(r => {
-    // Tampilkan URL Kamu jika statusnya ADA atau MIRIP
-    let myUrlCell = '<span style="color:var(--tf)">—</span>';
-    if (r.targetUrlObj) {
-      myUrlCell = `<a href="${esc(r.targetUrlObj.url)}" target="_blank" rel="noopener" style="color:var(--td); font-family:var(--m); font-size:10.5px;">${esc(r.targetUrlObj.slug)}</a>`;
-    }
-    
-    html += `<tr>
-      <td><b>${esc(r.kw)}</b></td>
-      <td style="color:var(--td)">${esc(r.cluster)}</td>
-      <td><span class="pill ${r.funnel.toLowerCase()}">${r.funnel}</span></td>
-      ${mineLabel ? `<td>${mBadge(r)}</td>` : ''}
-      ${mineLabel ? `<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${myUrlCell}</td>` : ''}
-      <td class="num" style="font-size:10px; color:var(--td)">${esc(r.source)}</td>
-      <td style="font-family:var(--m); font-size:10px;"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.slug)}</a></td>
-    </tr>`;
+  const ch=(label,col)=>`<th>${esc(label)} <span class="colcopy" onclick="copyCol('${col}')" title="Copy kolom ${esc(label)}">${ic('copy',12)}</span></th>`;
+  const showSim=(!mineLabel)?false:(fMatch==='similar'||fMatch==='all');
+  html+=`<div class="tbl-wrap"><table class="dt"><thead><tr>${ch('Keyword','kw')}${ch('Niche','cluster')}<th>Funnel</th>${mineLabel?'<th>Status</th>':''}${showSim?'<th>Mirip dengan (URL kamu)</th>':''}<th class="num">Sumber</th>${ch('URL Kompetitor','url')}</tr></thead><tbody>`;
+  const mBadge=r=>r.match==='gap'?'<span class="tag danger">GAP</span>':r.match==='similar'?`<span class="tag warn">MIRIP ${r.simPct}%</span>`:r.match==='have'?'<span class="tag ok">ADA</span>':'';
+  view.forEach(r=>{
+    const simCell=showSim?`<td style="font-family:var(--m);font-size:10px;">${r.simUrl?`<a href="${esc(r.simUrl.url)}" target="_blank" rel="noopener" title="${r.simPct}% mirip">${esc(r.simUrl.slug)}</a>`:'<span style="color:var(--tf)">—</span>'}</td>`:'';
+    html+=`<tr><td><b>${esc(r.kw)}</b></td><td style="color:var(--td)">${esc(r.cluster)}</td><td><span class="pill ${r.funnel.toLowerCase()}">${r.funnel}</span></td>${mineLabel?`<td>${mBadge(r)}</td>`:''}${simCell}<td class="num" style="font-size:10px;color:var(--td)">${esc(r.source)}</td><td style="font-family:var(--m);font-size:10px;"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.slug)}</a></td></tr>`;
   });
-  
-  html += `</tbody></table></div>`;
-  $('content').innerHTML = html;
-  window._kwView = view;
+  html+=`</tbody></table></div>`;
+  $('content').innerHTML=html;
+  window._kwView=view;
 }
+function copyCol(which){
+  const v=window._kwView||[];if(!v.length){toast('Kosong','err');return;}
+  let txt,label;
+  if(which==='kw'){txt=v.map(r=>r.kw).join('\n');label='Keyword';}
+  else if(which==='url'){txt=v.map(r=>r.url).join('\n');label='URL';}
+  else if(which==='cluster'){txt=v.map(r=>r.cluster).join('\n');label='Niche';}
+  else{txt=v.map(r=>r.kw).join('\n');label='Keyword';}
+  copyText(txt,label);
+}
+
 function renderTimeline(p){
   const items=p.result.items;
   const {clusters,mineLabel}=aggregate(p);
@@ -1814,7 +1718,7 @@ function renderTimeline(p){
   html+=`</div>`;
   $('content').innerHTML=html;
 }
-  
+
 function renderUrls(p){
   const items=p.result.items;
   const f=$('urlFilter')?$('urlFilter').value.toLowerCase():'';
