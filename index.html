@@ -1739,6 +1739,82 @@ function renderKeywords(p){
   $('content').innerHTML = html;
   window._kwView = view;
 }
+function renderTimeline(p){
+  const items=p.result.items;
+  const {clusters,mineLabel}=aggregate(p);
+  const bySrc={};
+  items.forEach(i=>{
+    if(!i.lastmod)return;const m=i.lastmod.match(/(\d{4})-(\d{2})/);if(!m)return;
+    const key=`${m[1]}-${m[2]}`;
+    (bySrc[i.source]=bySrc[i.source]||{})[key]=((bySrc[i.source]||{})[key]||0)+1;
+  });
+  const withDates=items.filter(i=>i.lastmod&&/\d{4}-\d{2}/.test(i.lastmod));
+  let html=`<div class="view-head"><div><h2>Publishing — Kesimpulan</h2><div class="view-sub">Analisis ritme & fokus publikasi dari tanggal lastmod</div></div>
+    <div class="note">${ic('info')} <span>Ritme & fokus publikasi dari tanggal lastmod. Termasuk daftar artikel yang diperbarui dalam 30 hari terakhir, dikelompokkan per niche.</span></div></div>`;
+  if(!withDates.length){
+    html+=`<div class="es" style="height:auto;padding:50px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--tf)" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h4>Tidak ada tanggal lastmod</h4><p>Sitemap yang kamu input tidak memuat tanggal modifikasi, jadi analisis publikasi tidak tersedia.</p></div>`;
+    $('content').innerHTML=html;return;
+  }
+  const now=new Date();const months3=new Date(now.getFullYear(),now.getMonth()-3,1);
+  const concl=[];
+  const srcLabels=[...new Set(withDates.map(i=>i.source))];
+  srcLabels.forEach(s=>{
+    const arr=withDates.filter(i=>i.source===s);
+    const dates=arr.map(i=>new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'))).filter(d=>!isNaN(d));
+    if(!dates.length)return;
+    dates.sort((a,b)=>a-b);
+    const newest=dates[dates.length-1],oldest=dates[0];
+    const recent=arr.filter(i=>{const d=new Date(i.lastmod.replace(' ','T'));return !isNaN(d)&&d>=months3;});
+    const recentPct=Math.round(recent.length/arr.length*100);
+    const recCl={};recent.forEach(i=>recCl[i.cluster]=(recCl[i.cluster]||0)+1);
+    const topRecent=Object.entries(recCl).sort((a,b)=>b[1]-a[1])[0];
+    const monthsSpan=Math.max(1,Math.round((newest-oldest)/(1000*60*60*24*30)));
+    const rate=(arr.length/monthsSpan).toFixed(1);
+    concl.push({s,total:arr.length,newest,oldest,recentPct,topRecent,rate,monthsSpan,isMine:s===mineLabel});
+  });
+  concl.sort((a,b)=>b.recentPct-a.recentPct);
+  const fmt=d=>d.toLocaleDateString('id-ID',{month:'short',year:'numeric'});
+  html+=`<div class="insight"><h3>${ic('calendar')} Ringkasan Publikasi</h3><ul>`;
+  if(concl[0])html+=`<li>Paling aktif belakangan: <b>${esc(concl[0].s)}</b> — ${concl[0].recentPct}% kontennya diperbarui dalam 3 bulan terakhir${concl[0].topRecent?`, fokus terbaru di niche <b>${esc(concl[0].topRecent[0])}</b>`:''}.</li>`;
+  const slow=concl[concl.length-1];if(slow&&concl.length>1)html+=`<li>Paling jarang update: <b>${esc(slow.s)}</b> — hanya ${slow.recentPct}% konten baru, kemungkinan sedang tidak agresif di konten.</li>`;
+  html+=`</ul></div>`;
+  const nowTs=Date.now();const ms30=nowTs-30*24*3600*1000;
+  const recent=withDates.filter(i=>{const d=new Date(i.lastmod.replace(' ','T').replace(/ \+/,'+'));return !isNaN(d)&&d.getTime()>=ms30;});
+  if(recent.length){
+    const byCl={};recent.forEach(i=>(byCl[i.cluster]=byCl[i.cluster]||[]).push(i));
+    const sortedCl=Object.entries(byCl).sort((a,b)=>b[1].length-a[1].length);
+    html+=`<div class="section-title">${ic('calendar')} Artikel 30 hari terakhir <span style="font-weight:400;color:var(--td);font-size:11px;">(${recent.length} URL, dari tgl analisa) — dikelompokkan per niche</span></div>`;
+    html+=`<div style="display:flex;gap:7px;margin-bottom:12px;"><button class="btn btn-g btn-sm" onclick="copyRecent30()">${ic('copy',13)} Copy list</button></div>`;
+    html+=`<div class="cl-grid">`;
+    let copyTxt='';
+    sortedCl.forEach((entry,ci)=>{
+      const [cl,arr]=entry;
+      copyTxt+=`\n## ${cl} (${arr.length})\n`+arr.map(i=>`- ${i.url} [${i.source}] (${i.funnel})`).join('\n')+'\n';
+      const id='r30-'+ci;
+      const bySrc={};arr.forEach(i=>(bySrc[i.source]=bySrc[i.source]||[]).push(i));
+      html+=`<div class="cl-card open" id="${id}"><div class="cl-head" onclick="document.getElementById('${id}').classList.toggle('open')"><svg class="cl-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg><span class="cl-name">${esc(cl)}<span class="nd">${arr.length} artikel baru</span></span></div>
+        <div class="cl-body"><div class="cl-urls">${Object.entries(bySrc).map(([s,items])=>`<div class="cl-src-group"><div class="cl-src-h">${esc(s)} (${items.length})</div>${items.map(it=>`<div class="cl-url"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.slug)}</a><span class="fn ${it.funnel.toLowerCase()}">${it.funnel}</span> <span style="color:var(--tf);font-size:9px;">${esc((it.lastmod||'').slice(0,10))}</span></div>`).join('')}</div>`).join('')}</div></div></div>`;
+    });
+    html+=`</div>`;
+    window._recent30=copyTxt.trim();
+  }else{
+    html+=`<div class="section-title">${ic('calendar')} Artikel 30 hari terakhir</div><div style="color:var(--td);font-size:12px;margin-bottom:18px;">Tidak ada artikel yang diperbarui dalam 30 hari terakhir dari tanggal analisa.</div>`;
+  }
+
+  html+=`<div class="section-title">Detail per sumber</div><div class="cl-grid">`;
+  concl.forEach(c=>{
+    html+=`<div class="cl-card"><div class="cl-head" style="cursor:default">
+      <span class="cl-name">${esc(c.s)}${c.isMine?' <span class="nd">(saya)</span>':''}</span>
+      <span class="cl-badges"><span class="badge cnt">${c.total} URL bertanggal</span><span class="badge ${c.recentPct>=40?'bofu':c.recentPct>=20?'mofu':'tofu'}">${c.recentPct}% baru (3 bln)</span></span>
+    </div><div style="padding:0 16px 14px;font-size:11.5px;color:var(--td);line-height:1.7;">
+      Rentang publikasi: <b style="color:var(--t)">${fmt(c.oldest)} – ${fmt(c.newest)}</b> (~${c.monthsSpan} bln) · rata-rata <b style="color:var(--t)">${c.rate} URL/bulan</b>.
+      ${c.topRecent?`<br>Niche yang paling sering diperbarui belakangan: <b style="color:var(--t)">${esc(c.topRecent[0])}</b> (${c.topRecent[1]} URL).`:''}
+    </div></div>`;
+  });
+  html+=`</div>`;
+  $('content').innerHTML=html;
+}
+  
 function renderUrls(p){
   const items=p.result.items;
   const f=$('urlFilter')?$('urlFilter').value.toLowerCase():'';
