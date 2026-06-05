@@ -748,23 +748,24 @@ function manualCluster(items, taxoText) {
     if (i < 0) return null;
     return {
       name: line.slice(0, i).trim(),
-      // Mengubah keyword taksonomi menjadi array token yang bersih
-      kws: line.slice(i + 1).split(',').map(k => k.trim().toLowerCase().replace(/[^a-z0-9]/g, ''))
+      // Bersihkan kata kunci taksonomi dari spasi dan dash agar menjadi string flat
+      kws: line.slice(i + 1).split(',').map(k => k.trim().toLowerCase().replace(/[\s-_]+/g, ' ')).filter(Boolean)
     };
   }).filter(Boolean);
 
   const clusters = {};
   items.forEach(it => {
-    // Menggunakan slugTokens agar konsisten dengan logika pembersihan slug Anda
-    const tokens = slugTokens(it.slug); 
+    // Ubah slug URL menjadi string flat yang dipisahkan spasi biasa
+    const cleanSlug = decodeURIComponent(it.slug).toLowerCase().replace(/[\s-_]+/g, ' ');
     let best = 'Lainnya', bs = 0;
 
     taxo.forEach(t => {
       let sc = 0;
       t.kws.forEach(kw => {
-        // Cek apakah ada kecocokan antara token URL dengan keyword taksonomi
-        if (tokens.some(tok => tok === kw || tok.includes(kw) || kw.includes(tok))) {
-          sc += kw.length; // Memberi bobot berdasarkan panjang kata kunci
+        // Gunakan batasan kata (\b) agar kata "usaha" tidak tidak sengaja memicu "alamat-usaha"
+        // Dan pastikan kata kunci benar-benar ada di dalam slug
+        if (cleanSlug.includes(kw)) {
+          sc += kw.length; // Bobot berdasarkan panjang kata kunci yang cocok
         }
       });
       if (sc > bs) { bs = sc; best = t.name; }
