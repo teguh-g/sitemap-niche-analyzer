@@ -759,15 +759,23 @@ function manualCluster(items, taxoText) {
     const cleanSlug = decodeURIComponent(it.slug).toLowerCase().replace(/[\s-_]+/g, ' ');
     let best = 'Lainnya', bs = 0;
 
-    taxo.forEach(t => {
+    // Loop taxo sekarang bawa 'index' untuk tau posisi baris
+    taxo.forEach((t, index) => {
       let sc = 0;
       t.kws.forEach(kw => {
-        // Gunakan batasan kata (\b) agar kata "usaha" tidak tidak sengaja memicu "alamat-usaha"
-        // Dan pastikan kata kunci benar-benar ada di dalam slug
         if (cleanSlug.includes(kw)) {
           sc += kw.length; // Bobot berdasarkan panjang kata kunci yang cocok
         }
       });
+      
+      // LOGIC BARU: HIERARCHY BONUS (Prioritas Baris)
+      if (sc > 0) {
+        // Beri bonus poin berdasarkan seberapa 'atas' posisinya di textarea.
+        // Baris paling atas dapat bonus terbesar.
+        const hierarchyBonus = (taxo.length - index) * 10;
+        sc += hierarchyBonus;
+      }
+
       if (sc > bs) { bs = sc; best = t.name; }
     });
 
@@ -776,7 +784,6 @@ function manualCluster(items, taxoText) {
   
   return Object.entries(clusters).map(([name, indices]) => ({ name, indices }));
 }
-
 function ruleCluster(items){
   const phraseFreq={};
   const itemPhrases=items.map(it=>{
